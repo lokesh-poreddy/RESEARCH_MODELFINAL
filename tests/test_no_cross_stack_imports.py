@@ -197,4 +197,38 @@ def test_no_database_imports_in_execution_benchmark():
     )
 
 
+def test_no_database_imports_in_phase13_modules():
+    """Phase 13 modules (transfer, router, monitoring) must never import persistence libraries."""
+    forbidden_database_pkgs = frozenset(["sqlalchemy", "alembic", "psycopg", "psycopg2", "sqlite3"])
+    phase13_roots = [
+        CANONICAL_ROOT / "transfer",
+        CANONICAL_ROOT / "router",
+        CANONICAL_ROOT / "benchmarks" / "monitoring",
+    ]
+    violations = []
+
+    for root_dir in phase13_roots:
+        for py_file in root_dir.rglob("*.py"):
+            tree = ast.parse(py_file.read_text(encoding="utf-8"))
+            for node in ast.walk(tree):
+                modules_to_check = []
+                if isinstance(node, ast.ImportFrom) and node.module:
+                    modules_to_check.append(node.module)
+                elif isinstance(node, ast.Import):
+                    for alias in node.names:
+                        modules_to_check.append(alias.name)
+
+                for mod in modules_to_check:
+                    pkg = mod.split(".")[0]
+                    if pkg in forbidden_database_pkgs or "repositories" in mod:
+                        rel_path = py_file.relative_to(PROJECT_ROOT)
+                        violations.append(f"{rel_path}:{getattr(node, 'lineno', '?')} imports forbidden db package {mod!r}")
+
+    assert not violations, (
+        f"Phase 13 package database leakage found ({len(violations)}):\n"
+        + "\n".join(f"  - {v}" for v in violations)
+    )
+
+
+
 

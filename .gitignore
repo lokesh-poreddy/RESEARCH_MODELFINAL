@@ -51,3 +51,5 @@ phase12b_preflight_report.json
 phase12b_preflight_attestation.json
 phase12b_artifact_registry.json
 phase12b_execution_ledger.jsonl
+phase12b_monitoring_snapshot.json
+

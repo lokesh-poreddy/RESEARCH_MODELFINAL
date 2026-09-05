@@ -117,7 +117,11 @@ class ResearchController:
                  trajectory_memory: Optional[TrajectoryMemory] = None,
                  adaptive_trajectory_memory: Optional[AdaptiveTrajectoryMemory] = None,
                  policy_learner: Optional[PolicyLearner] = None,
-                 failed_signatures: Optional[set] = None):
+                 failed_signatures: Optional[set] = None,
+                 enable_dynamic_router: bool = False,
+                 transfer_guard_mode: Optional[str] = None,
+                 router: Optional[Any] = None,
+                 transfer_guard: Optional[Any] = None):
         """Initialise the ResearchController.
 
         Parameters
@@ -168,6 +172,20 @@ class ResearchController:
         self.use_policy = condition in ("full", "trajectory_memory", "adaptive_trajectory", "no_memory", "continuous_experience", "cold_start", "flat_ecrm")
         self._failed_signatures = set(failed_signatures) if failed_signatures is not None else set()
         self._last_decision_metadata: Dict[str, Any] = {}
+
+        # ── Phase 13 Opt-in Wiring (RF-1.0.0-beta.1) ─────────────────────
+        self.enable_dynamic_router = enable_dynamic_router
+        self.transfer_guard_mode = transfer_guard_mode
+        self.router = router
+        if self.enable_dynamic_router and self.router is None:
+            from ..router.router import DynamicModeRouter
+            self.router = DynamicModeRouter()
+
+        self.transfer_guard = transfer_guard
+        if self.transfer_guard_mode is not None and self.transfer_guard is None:
+            from ..transfer.guard import TransferGuard
+            from ..transfer.types import TransferGuardMode
+            self.transfer_guard = TransferGuard(mode=TransferGuardMode(self.transfer_guard_mode.upper()))
 
         # ── RSG execution_config wiring (alpha.2.1) ───────────────────────
         # execution_config controls sandbox/resource policy, NOT scientific validity.
@@ -442,6 +460,8 @@ class ResearchController:
 
         # -- generational search loop
         for gen in range(n_generations):
+            if self.router is not None:
+                self.router.handle_budget_signal(remaining_budget=n_generations - gen, total_budget=n_generations)
             parent = self.rng.choice(self.population)
             hyp_text = f"Improve on genome derived from {parent.model_type} for {self.task.name}"
             strategy, used_memory = self._select_strategy(parent)
