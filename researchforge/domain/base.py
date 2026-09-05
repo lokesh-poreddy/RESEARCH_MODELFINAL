@@ -57,3 +57,33 @@ class DomainObject:
         payload = {"schema_version": self.schema_version, "content": self.to_dict()}
         j = _canonical_json(payload)
         return hashlib.sha256(j.encode("utf-8")).hexdigest()
+
+
+from pathlib import Path
+from typing import Sequence, Optional
+
+
+def compute_canonical_fingerprint(
+    payload: Dict[str, Any],
+    excluded_fields: Optional[Sequence[str]] = None,
+) -> str:
+    r"""Computes a deterministic SHA-256 fingerprint over canonical JSON.
+
+    CRITICAL INVARIANT:
+    Excludes self-referential fingerprint fields and explicitly passed fields to prevent
+    hash circularity: H = SHA256(payload \ {self_fingerprint}).
+    """
+    default_excluded = frozenset(["fingerprint"])
+    excl = default_excluded.union(excluded_fields or [])
+    cleaned = {k: v for k, v in payload.items() if k not in excl}
+    canonical_str = _canonical_json(_as_primitive(cleaned))
+    return hashlib.sha256(canonical_str.encode("utf-8")).hexdigest()
+
+
+def compute_file_sha256(file_path: Path | str) -> str:
+    """Computes bitwise SHA-256 over exact physical file bytes on disk."""
+    p = Path(file_path)
+    if not p.exists():
+        raise FileNotFoundError(f"File not found for SHA-256 calculation: {p}")
+    return hashlib.sha256(p.read_bytes()).hexdigest()
+

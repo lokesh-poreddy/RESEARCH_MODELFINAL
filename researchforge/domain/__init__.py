@@ -17,8 +17,10 @@ from .experiment import ExperimentSpec, ExperimentRun
 from .outcome import Outcome
 from .diagnosis import Diagnosis
 from .failure import Failure
-from .evidence import Evidence
+from .evidence import Evidence, EvidenceType, EvidenceQuality
+from .claim import Claim, ClaimStatus, EvidenceRelation
 from .state import ResearchState
+from .action import ResearchAction, ActionType
 
 __all__ = [
     "DomainObject",
@@ -43,5 +45,13 @@ __all__ = [
     "Diagnosis",
     "Failure",
     "Evidence",
+    "EvidenceType",
+    "EvidenceQuality",
+    "Claim",
+    "ClaimStatus",
+    "EvidenceRelation",
     "ResearchState",
+    "ResearchAction",
+    "ActionType",
 ]
+

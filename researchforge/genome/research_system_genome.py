@@ -127,23 +127,29 @@ GENOME_SCHEMA_RSG: Dict[str, Any] = {
 class ResearchMemoryConfig:
     """Memory sub-configuration for an RSG.
 
-    memory_design : "flat_ecrm" | "trajectory" | "none"
+    memory_design : "flat_ecrm" | "trajectory" | "adaptive_trajectory" | "none"
         Selects the memory architecture. Maps to ResearchController's
         ``condition`` values: "full" → flat_ecrm, "trajectory_memory" →
-        trajectory, "no_memory"/"random" → none.
+        trajectory, "adaptive_trajectory" → adaptive_trajectory,
+        "no_memory"/"random" → none.
     """
     memory_design: str = "flat_ecrm"
     decay_lambda: float = 0.08
     retention_threshold: float = 0.12
     consolidate_every_n: int = 8
+    min_context_samples: int = 3
 
-    _VALID_DESIGNS = frozenset(["flat_ecrm", "trajectory", "none"])
+    _VALID_DESIGNS = frozenset(["flat_ecrm", "trajectory", "adaptive_trajectory", "none"])
 
     def __post_init__(self) -> None:
         if self.memory_design not in self._VALID_DESIGNS:
             raise ValueError(
                 f"memory_design must be one of {sorted(self._VALID_DESIGNS)}, "
                 f"got {self.memory_design!r}"
+            )
+        if self.min_context_samples < 1:
+            raise ValueError(
+                f"min_context_samples must be >= 1, got {self.min_context_samples}"
             )
 
     def to_dict(self) -> Dict[str, Any]:
@@ -152,6 +158,7 @@ class ResearchMemoryConfig:
             "decay_lambda": self.decay_lambda,
             "retention_threshold": self.retention_threshold,
             "consolidate_every_n": self.consolidate_every_n,
+            "min_context_samples": self.min_context_samples,
         }
 
     @classmethod
@@ -161,7 +168,9 @@ class ResearchMemoryConfig:
             decay_lambda=float(d.get("decay_lambda", 0.08)),
             retention_threshold=float(d.get("retention_threshold", 0.12)),
             consolidate_every_n=int(d.get("consolidate_every_n", 8)),
+            min_context_samples=int(d.get("min_context_samples", 3)),
         )
+
 
 
 @dataclass
@@ -387,17 +396,19 @@ class ResearchSystemGenome:
 
         Parameters
         ----------
-        condition : "full" | "trajectory_memory" | "no_memory" | "random"
+        condition : "full" | "trajectory_memory" | "adaptive_trajectory" | "no_memory" | "random"
         seed : RNG seed for deterministic RSG identity
         """
         _memory_map = {
             "full": "flat_ecrm",
             "trajectory_memory": "trajectory",
+            "adaptive_trajectory": "adaptive_trajectory",
             "no_memory": "none",
             "random": "none",
         }
         memory_design = _memory_map.get(condition, "flat_ecrm")
         memory_config = ResearchMemoryConfig(memory_design=memory_design)
+
 
         # All TMG operators allowed; equal prior weights
         operators = list(_TMG_STRATEGIES)

@@ -10,7 +10,14 @@ Writes a JSON `phase6_benchmark_result.json` with machine-readable results.
 from __future__ import annotations
 
 import json
+from pathlib import Path
+import sys
 import time
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
 from researchforge.domain.state import ResearchState
 from researchforge.domain.provenance import Provenance
 from researchforge.state.events import Event, EventType

@@ -40,6 +40,7 @@ Four `condition`s implement the RDE-Bench ablation ladder:
   - "random":            uniform-random strategy choice, no learning.
 """
 from __future__ import annotations
+import math
 import random
 import time
 from dataclasses import dataclass, field
@@ -53,6 +54,13 @@ from ..memory.ecrm import ECRM
 from ..memory.trajectory import (
     TrajectoryMemory, TrajectoryRecord, capacity_bucket, generation_stage, new_trajectory_id,
 )
+from ..memory.adaptive_trajectory import (
+    AdaptiveTrajectoryMemory,
+    AdaptiveTrajectoryRecord,
+    ContextualRetrievalResult,
+    FailureCheckResult,
+    new_adaptive_trajectory_id,
+)
 from ..policy.policy_learner import PolicyLearner
 from ..diagnosis.failure_taxonomy import diagnose, ExperimentResult, FailureCategory
 from ..evaluators.sklearn_evaluator import evaluate_genome
@@ -60,7 +68,10 @@ from .discovery import HeuristicSynthesizer, unit_test
 from ..benchmarks.tasks import Task
 from ..state.research_state import ResearchState
 
-CONDITIONS = ("full", "trajectory_memory", "no_memory", "random")
+CONDITIONS = (
+    "full", "trajectory_memory", "adaptive_trajectory", "no_memory", "random",
+    "cold_start", "continuous_experience", "flat_ecrm",
+)
 
 
 @dataclass
@@ -74,6 +85,11 @@ class TrialRecord:
     used_memory: bool
     memory_negative_transfer: bool
     genome_id: str
+    context_level: Optional[int] = None
+    requested_context_level: Optional[int] = None
+    sample_count: Optional[int] = None
+    fallback_reason: Optional[str] = None
+    memory_decision_contribution: Optional[Dict[str, Any]] = None
 
 
 @dataclass
@@ -86,6 +102,7 @@ class RunResult:
     rdg_stats: dict = field(default_factory=dict)
     memory_half_life_days: float = float("nan")
     trajectory_stats: Dict[str, int] = field(default_factory=dict)
+    adaptive_trajectory_stats: Dict[str, Any] = field(default_factory=dict)
     wall_time_s: float = 0.0
     rsg_id: Optional[str] = None  # RF-1.0.0-alpha.2: set if RSG was provided
     states: List[ResearchState] = field(default_factory=list)  # alpha.2.1: ResearchState per generation
@@ -95,7 +112,12 @@ class ResearchController:
     def __init__(self, task: Task, condition: str = "full", seed: int = 0,
                  population_size: int = 6, initial_model_type: str = "LogisticRegression",
                  use_sandbox: bool = False, sandbox_timeout_s: float = 15.0,
-                 rsg: Optional[Any] = None):
+                 rsg: Optional[Any] = None,
+                 ecrm: Optional[ECRM] = None,
+                 trajectory_memory: Optional[TrajectoryMemory] = None,
+                 adaptive_trajectory_memory: Optional[AdaptiveTrajectoryMemory] = None,
+                 policy_learner: Optional[PolicyLearner] = None,
+                 failed_signatures: Optional[set] = None):
         """Initialise the ResearchController.
 
         Parameters
@@ -127,20 +149,25 @@ class ResearchController:
         if rsg is not None:
             _decay_lambda = rsg.memory_config.decay_lambda
             _retention_threshold = rsg.memory_config.retention_threshold
+            _min_context_samples = getattr(rsg.memory_config, "min_context_samples", 3)
         else:
             _decay_lambda = 0.08        # RF-0.x hardcoded default
             _retention_threshold = 0.12 # RF-0.x hardcoded default
+            _min_context_samples = 3
 
-        self.ecrm = ECRM(decay_lambda=_decay_lambda, retention_threshold=_retention_threshold)
-        self.trajectory_memory = TrajectoryMemory()
-        self.policy = PolicyLearner(STRATEGIES, rng=self.rng)
+        self.ecrm = ecrm if ecrm is not None else ECRM(decay_lambda=_decay_lambda, retention_threshold=_retention_threshold)
+        self.trajectory_memory = trajectory_memory if trajectory_memory is not None else TrajectoryMemory()
+        self.adaptive_trajectory_memory = adaptive_trajectory_memory if adaptive_trajectory_memory is not None else AdaptiveTrajectoryMemory(min_context_samples=_min_context_samples)
+        self.policy = policy_learner if policy_learner is not None else PolicyLearner(STRATEGIES, rng=self.rng)
         self.synth = HeuristicSynthesizer()
         self.population_size = population_size
-        self.memory_enabled = condition in ("full", "trajectory_memory")
-        self.use_flat_memory = condition == "full"
+        self.memory_enabled = condition in ("full", "trajectory_memory", "adaptive_trajectory", "continuous_experience", "cold_start", "flat_ecrm")
+        self.use_flat_memory = condition in ("full", "flat_ecrm")
         self.use_trajectory_memory = condition == "trajectory_memory"
-        self.use_policy = condition in ("full", "trajectory_memory", "no_memory")
-        self._failed_signatures = set()
+        self.use_adaptive_trajectory = condition in ("adaptive_trajectory", "continuous_experience", "cold_start")
+        self.use_policy = condition in ("full", "trajectory_memory", "adaptive_trajectory", "no_memory", "continuous_experience", "cold_start", "flat_ecrm")
+        self._failed_signatures = set(failed_signatures) if failed_signatures is not None else set()
+        self._last_decision_metadata: Dict[str, Any] = {}
 
         # ── RSG execution_config wiring (alpha.2.1) ───────────────────────
         # execution_config controls sandbox/resource policy, NOT scientific validity.
@@ -173,6 +200,26 @@ class ResearchController:
         base = TargetModelGenome.from_model_genome(base_mg)
         base._score = -1.0
         self.population: List[TargetModelGenome] = [base]
+
+    @property
+    def use_memory(self) -> bool:
+        return self.memory_enabled
+
+    @property
+    def memory_mode(self) -> str:
+        if not self.memory_enabled:
+            return "none"
+        if self.use_adaptive_trajectory:
+            return "adaptive"
+        if self.use_trajectory_memory:
+            return "trajectory"
+        if self.use_flat_memory:
+            return "ecrm"
+        return "adaptive"
+
+    @property
+    def policy_learner(self) -> PolicyLearner:
+        return self.policy
 
     # ------------------------------------------------------------------
     def _run_experiment(self, genome: TargetModelGenome) -> ExperimentResult:
@@ -236,6 +283,70 @@ class ResearchController:
             multiplier = lambda a: 0.3 + 0.7 * self.trajectory_memory.contextual_success_rate(
                 a, parent.model_type, parent_bucket)
             return self.policy.select_action(score_multiplier=multiplier), True
+        if self.condition in ("adaptive_trajectory", "continuous_experience", "cold_start"):
+            parent_mg = parent.to_model_genome()  # bridge for capacity_bucket
+            parent_bucket = capacity_bucket(parent_mg)
+            audit_info: Dict[str, Any] = {}
+            best_action = None
+            best_final_score = -float("inf")
+            selected_retrieval: Optional[ContextualRetrievalResult] = None
+
+            for a in self.policy.actions:
+                reward = self.policy.q[a]
+                bonus = self.policy.c * math.sqrt(
+                    math.log(self.policy.total_trials + 1) / (1 + self.policy.times_tried[a])
+                )
+                baseline_score = reward + bonus
+
+                retrieval = self.adaptive_trajectory_memory.contextual_success_rate(
+                    a, parent.model_type, parent_bucket
+                )
+                effective_rate = (
+                    retrieval.success_rate * retrieval.confidence
+                    + self.adaptive_trajectory_memory.default_prior * (1.0 - retrieval.confidence)
+                )
+                multiplier = 0.3 + 0.7 * effective_rate
+
+                fail_check = self.adaptive_trajectory_memory.similar_trajectory_recently_failed(
+                    a, parent.model_type, parent_bucket, window=3
+                )
+                final_score = baseline_score * multiplier
+                if fail_check.has_failed_majority:
+                    final_score *= 0.5
+
+                audit_info[a] = {
+                    "baseline_score": round(baseline_score, 4),
+                    "multiplier": round(multiplier, 4),
+                    "context_level": retrieval.context_level,
+                    "sample_count": retrieval.sample_count,
+                    "evidence_sufficiency": retrieval.evidence_sufficiency,
+                    "fallback_reason": retrieval.fallback_reason,
+                    "confidence": retrieval.confidence,
+                    "success_rate": round(retrieval.success_rate, 4),
+                    "has_failed_majority": fail_check.has_failed_majority,
+                    "final_score": round(final_score, 4),
+                }
+
+                if final_score > best_final_score:
+                    best_final_score = final_score
+                    best_action = a
+                    selected_retrieval = retrieval
+
+            best_mem_action = max(audit_info.keys(), key=lambda k: audit_info[k]["multiplier"])
+            decision_contrib = {
+                "memory_recommendation": best_mem_action,
+                "baseline_strategy_score": audit_info[best_action]["baseline_score"],
+                "final_strategy_score": audit_info[best_action]["final_score"],
+                "audit_per_action": audit_info,
+            }
+            self._last_decision_metadata = {
+                "context_level": selected_retrieval.context_level if selected_retrieval else 0,
+                "requested_context_level": 3,
+                "sample_count": selected_retrieval.sample_count if selected_retrieval else 0,
+                "fallback_reason": selected_retrieval.fallback_reason if selected_retrieval else None,
+                "memory_decision_contribution": decision_contrib,
+            }
+            return best_action, True
         # condition == "full"
         failure_check = lambda a: self.ecrm.has_similar_failure(
             self._mem_key(a, parent.model_type), threshold=0.9)
@@ -244,11 +355,20 @@ class ResearchController:
     def _record_trial(self, result: RunResult, generation: int, strategy: str,
                        model_type: str, exp_result: ExperimentResult, best_metric: float,
                        failure: FailureCategory, used_memory: bool,
-                       neg_transfer: bool, genome_id: str) -> None:
+                       neg_transfer: bool, genome_id: str,
+                       context_level: Optional[int] = None,
+                       requested_context_level: Optional[int] = None,
+                       sample_count: Optional[int] = None,
+                       fallback_reason: Optional[str] = None,
+                       memory_decision_contribution: Optional[Dict[str, Any]] = None) -> None:
         result.trials.append(TrialRecord(
             generation=generation, strategy=strategy, model_type=model_type,
             metric=exp_result.metric, best_so_far=best_metric, failure=failure.value,
-            used_memory=used_memory, memory_negative_transfer=neg_transfer, genome_id=genome_id))
+            used_memory=used_memory, memory_negative_transfer=neg_transfer, genome_id=genome_id,
+            context_level=context_level, requested_context_level=requested_context_level,
+            sample_count=sample_count, fallback_reason=fallback_reason,
+            memory_decision_contribution=memory_decision_contribution))
+
 
     # ------------------------------------------------------------------
     def run(self, n_generations: int = 25) -> RunResult:
@@ -293,6 +413,18 @@ class ResearchController:
                 metric=base_result.metric, success=base_result.success,
                 failure=base_failure.value,
                 hypothesis_id=hyp0.id, experiment_id=exp0.id, finding_id=finding0.id))
+        elif self.use_adaptive_trajectory:
+            base_bucket = capacity_bucket(base_mg)
+            self.adaptive_trajectory_memory.store(AdaptiveTrajectoryRecord(
+                id=new_adaptive_trajectory_id(), generation=-1, stage="baseline",
+                problem_context=self.gap.content,
+                parent_model_type=base.model_type, parent_capacity_bucket=base_bucket,
+                strategy="baseline",
+                child_model_type=base.model_type, child_capacity_bucket=base_bucket,
+                metric=base_result.metric, success=base_result.success,
+                failure=base_failure.value,
+                hypothesis_id=hyp0.id, spec_id=exp0.id, run_id=f"run_baseline_{base.tmg_id}",
+                finding_id=finding0.id, provenance_id=f"prov_baseline_{base.tmg_id}"))
         self._record_trial(result, -1, "baseline", base.model_type, base_result,
                             best_metric, base_failure, False, False, base.tmg_id)
         result.states.append(ResearchState.create(
@@ -382,6 +514,21 @@ class ResearchController:
                     success=(failure == FailureCategory.NONE),
                     failure=failure.value,
                     hypothesis_id=hyp.id, experiment_id=exp.id, finding_id=finding.id))
+            elif self.use_adaptive_trajectory:
+                self.adaptive_trajectory_memory.store(AdaptiveTrajectoryRecord(
+                    id=new_adaptive_trajectory_id(), generation=gen,
+                    stage=generation_stage(gen, n_generations),
+                    problem_context=self.gap.content,
+                    parent_model_type=parent.model_type,
+                    parent_capacity_bucket=capacity_bucket(parent_mg),
+                    strategy=strategy,
+                    child_model_type=child.model_type,
+                    child_capacity_bucket=capacity_bucket(child_mg),
+                    metric=exp_result.metric,
+                    success=(failure == FailureCategory.NONE),
+                    failure=failure.value,
+                    hypothesis_id=hyp.id, spec_id=exp.id, run_id=f"run_gen{gen}_{child.tmg_id}",
+                    finding_id=finding.id, provenance_id=f"prov_gen{gen}_{child.tmg_id}"))
 
             if self.use_policy:
                 self.policy.update(strategy, reward=exp_result.metric)
@@ -396,8 +543,19 @@ class ResearchController:
             if len(self.population) > self.population_size:
                 self.population = self.population[: self.population_size]
 
-            self._record_trial(result, gen, strategy, child.model_type, exp_result,
-                                best_metric, failure, used_memory, neg_transfer, child.tmg_id)
+            if self.use_adaptive_trajectory and self._last_decision_metadata:
+                self._record_trial(
+                    result, gen, strategy, child.model_type, exp_result,
+                    best_metric, failure, used_memory, neg_transfer, child.tmg_id,
+                    context_level=self._last_decision_metadata.get("context_level"),
+                    requested_context_level=self._last_decision_metadata.get("requested_context_level"),
+                    sample_count=self._last_decision_metadata.get("sample_count"),
+                    fallback_reason=self._last_decision_metadata.get("fallback_reason"),
+                    memory_decision_contribution=self._last_decision_metadata.get("memory_decision_contribution"),
+                )
+            else:
+                self._record_trial(result, gen, strategy, child.model_type, exp_result,
+                                    best_metric, failure, used_memory, neg_transfer, child.tmg_id)
             result.states.append(ResearchState.create(
                 generation=gen,
                 research_phase="exploration" if self.rsg is None else self.rsg.research_phase,
@@ -419,6 +577,35 @@ class ResearchController:
             self.ecrm.memory_half_life_days() if self.use_flat_memory else float("nan"))
         result.trajectory_stats = (
             self.trajectory_memory.stats() if self.use_trajectory_memory else {})
+        result.adaptive_trajectory_stats = (
+            self.adaptive_trajectory_memory.stats() if self.use_adaptive_trajectory else {})
         result.wall_time_s = time.time() - t0
         result.rsg_id = self.rsg.rsg_id if self.rsg is not None else None
         return result
+
+    def export_memory_fingerprint(self) -> str:
+        """Computes a deterministic content-addressed hash of current memory state."""
+        import hashlib
+        if not self.use_memory:
+            return "no_memory_disabled"
+        ecrm_len = len(self.ecrm.records) if self.ecrm else 0
+        traj_len = len(self.trajectory_memory.records) if self.trajectory_memory else 0
+        adapt_len = len(self.adaptive_trajectory_memory.records) if self.adaptive_trajectory_memory else 0
+        failed = sorted(list(str(s) for s in self._failed_signatures))
+        parts = [
+            f"ecrm:{ecrm_len}",
+            f"traj:{traj_len}",
+            f"adaptive:{adapt_len}",
+            f"failed:{failed}",
+        ]
+        raw = "|".join(parts)
+        return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+    def reset_memory(self) -> None:
+        """Explicitly reset all accumulated memory state for cold-start boundaries."""
+        self.ecrm = ECRM()
+        self.trajectory_memory = TrajectoryMemory()
+        self.adaptive_trajectory_memory = AdaptiveTrajectoryMemory()
+        self._failed_signatures = set()
+
+

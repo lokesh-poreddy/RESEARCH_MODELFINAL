@@ -1,0 +1,25 @@
+{
+  "$id": "claim.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Claim",
+  "type": "object",
+  "required": ["id", "schema_version", "statement"],
+  "properties": {
+    "id": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "statement": { "type": "string" },
+    "claim_type": { "type": ["string", "null"] },
+    "confidence": { "type": ["number", "null"] },
+    "status": { "type": ["string", "null"] },
+    "hypothesis_id": { "type": ["string", "null"] },
+    "problem_id": { "type": ["string", "null"] },
+    "supporting_evidence_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "contradicting_evidence_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "uncertain_evidence_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "speculative_evidence_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "provenance_id": { "type": ["string", "null"] },
+    "created_at": { "type": ["number", "null"] },
+    "metadata": { "type": ["object", "null"] }
+  },
+  "additionalProperties": false
+}

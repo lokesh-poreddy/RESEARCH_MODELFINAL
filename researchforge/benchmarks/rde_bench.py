@@ -24,11 +24,19 @@ class BenchSummary:
     memory_utility: float = 0.0      # MU: filled in for a memory condition, relative to 'no_memory'
     memory_half_life_days: float = float("nan")
     curves: List[List[float]] = field(default_factory=list)  # best-so-far per seed, incl. baseline
+    context_level_distribution: Dict[int, int] = field(default_factory=dict)
+    backoff_frequency: float = 0.0
+    failure_blocking_events: int = 0
+    memory_influenced_decisions: int = 0
 
 
 def run_condition(task: Task, condition: str, seeds: List[int], n_generations: int) -> BenchSummary:
     bests, curves, fr_rates, ntr_rates, se_list = [], [], [], [], []
     half_life = float("nan")
+    backoff_counts = 0
+    failure_blocks = 0
+    memory_influences = 0
+    level_counts: Dict[int, int] = {3: 0, 2: 0, 1: 0, 0: 0}
 
     for seed in seeds:
         ctrl = ResearchController(task, condition=condition, seed=seed)
@@ -48,6 +56,15 @@ def run_condition(task: Task, condition: str, seeds: List[int], n_generations: i
                 if sig in seen_bad:
                     n_repeat += 1
                 seen_bad.add(sig)
+            if t.context_level is not None:
+                level_counts[t.context_level] = level_counts.get(t.context_level, 0) + 1
+            if t.fallback_reason is not None and "insufficient_samples" in t.fallback_reason:
+                backoff_counts += 1
+            if t.memory_decision_contribution:
+                memory_influences += 1
+                contrib = t.memory_decision_contribution
+                if contrib.get("audit_per_action", {}).get(t.strategy, {}).get("has_failed_majority"):
+                    failure_blocks += 1
         fr_rates.append(n_repeat / len(run.trials) if run.trials else 0.0)
 
         used_mem = [t for t in run.trials if t.used_memory]
@@ -64,13 +81,21 @@ def run_condition(task: Task, condition: str, seeds: List[int], n_generations: i
     mean_best = statistics.mean(bests)
     std_best = statistics.pstdev(bests) if len(bests) > 1 else 0.0
     re = mean_best / max(1, n_generations)
+    total_context_queries = sum(level_counts.values())
+    backoff_freq = backoff_counts / max(1, total_context_queries) if total_context_queries > 0 else 0.0
+
     return BenchSummary(
         task_name=task.name, condition=condition,
         best_metric_mean=mean_best, best_metric_std=std_best,
         research_efficiency=re, search_efficiency=int(round(statistics.mean(se_list))),
         failure_repetition_rate=statistics.mean(fr_rates),
         negative_transfer_rate=statistics.mean(ntr_rates),
-        memory_half_life_days=half_life, curves=curves)
+        memory_half_life_days=half_life, curves=curves,
+        context_level_distribution=level_counts,
+        backoff_frequency=backoff_freq,
+        failure_blocking_events=failure_blocks,
+        memory_influenced_decisions=memory_influences,
+    )
 
 
 def run_rde_bench(tasks: List[Task], seeds: List[int] = (0, 1, 2),
@@ -81,20 +106,23 @@ def run_rde_bench(tasks: List[Task], seeds: List[int] = (0, 1, 2),
         for cond in CONDITIONS:
             report[task.name][cond] = run_condition(task, cond, list(seeds), n_generations)
         nomem = report[task.name]["no_memory"]
-        for memory_cond in ("full", "trajectory_memory"):
-            report[task.name][memory_cond].memory_utility = (
-                report[task.name][memory_cond].best_metric_mean - nomem.best_metric_mean)
+        for memory_cond in ("full", "trajectory_memory", "adaptive_trajectory"):
+            if memory_cond in report[task.name]:
+                report[task.name][memory_cond].memory_utility = (
+                    report[task.name][memory_cond].best_metric_mean - nomem.best_metric_mean)
     return report
 
 
 def print_report(report: Dict[str, Dict[str, BenchSummary]]) -> None:
     for task_name, conds in report.items():
         print(f"\n=== RDE-Bench: {task_name} ===")
-        print(f"{'condition':<18}{'best':>8}{'RE':>8}{'SE':>6}{'FRR':>7}{'NTR':>7}{'MU':>9}")
-        for cond_name in ("full", "trajectory_memory", "no_memory", "random"):
+        print(f"{'condition':<20}{'best':>8}{'RE':>8}{'SE':>6}{'FRR':>7}{'NTR':>7}{'MU':>9}")
+        for cond_name in ("full", "trajectory_memory", "adaptive_trajectory", "no_memory", "random"):
+            if cond_name not in conds:
+                continue
             s = conds[cond_name]
-            mu = f"{s.memory_utility:+.4f}" if cond_name in ("full", "trajectory_memory") else "--"
-            print(f"{cond_name:<18}{s.best_metric_mean:>8.4f}{s.research_efficiency:>8.4f}"
+            mu = f"{s.memory_utility:+.4f}" if cond_name in ("full", "trajectory_memory", "adaptive_trajectory") else "--"
+            print(f"{cond_name:<20}{s.best_metric_mean:>8.4f}{s.research_efficiency:>8.4f}"
                   f"{s.search_efficiency:>6d}{s.failure_repetition_rate:>7.2f}"
                   f"{s.negative_transfer_rate:>7.2f}{mu:>9}")
         print("(best = mean best validation metric across seeds; RE = best/#experiments; "
@@ -102,3 +130,4 @@ def print_report(report: Dict[str, Dict[str, BenchSummary]]) -> None:
               "MU is relative to no_memory)")
         print(f"analytic memory half-life (decay parameter): "
               f"{conds['full'].memory_half_life_days:.1f} days")
+

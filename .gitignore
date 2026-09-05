@@ -39,3 +39,15 @@ saved_models/
 
 # MyPy
 .mypy_cache/
+
+# Local clones / scratch
+Research_model
+Research_model/
+.pg_test_data/
+
+# Phase 12B generated execution artifacts (regenerated from clean commit)
+phase12b_execution_manifest.json
+phase12b_preflight_report.json
+phase12b_preflight_attestation.json
+phase12b_artifact_registry.json
+phase12b_execution_ledger.jsonl

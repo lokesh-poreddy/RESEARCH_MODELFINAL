@@ -1,0 +1,371 @@
+{
+  "specification_version": "1.0.1",
+  "parent_fingerprint": "b95ef8fa43a49f7d306e7e42a117b45c51186699467945597d06c2daf7c27707",
+  "superseded_fingerprints": [
+    "b95ef8fa43a49f7d306e7e42a117b45c51186699467945597d06c2daf7c27707"
+  ],
+  "title": "Phase 12B Research Continuity Benchmark Analysis Dataset Specification",
+  "code_revision": "HEAD",
+  "sign_convention": {
+    "convention_name": "CANONICAL_TEST_MINUS_CONTROL",
+    "formula": "delta = test_value - control_value",
+    "higher_is_better_direction": "GREATER",
+    "lower_is_better_direction": "LESS"
+  },
+  "tasks": {
+    "digits_0_4": {
+      "task_id": "digits_0_4",
+      "task_family": "DIGITS_SPATIAL",
+      "generation_algorithm": "sklearn.datasets.load_digits:subset_0_4",
+      "generator_version": "1.0.0",
+      "dataset_seed": 42,
+      "sample_count_train": 40,
+      "sample_count_val": 160,
+      "sample_count_test": 160,
+      "feature_dimensions": [
+        64
+      ],
+      "label_construction": "raw_digit_classes_0_to_4",
+      "noise_parameters": {
+        "type": "none",
+        "variance": 0.0
+      },
+      "train_val_test_splits": {
+        "train_size": 40,
+        "val_size": 160,
+        "test_size": 160,
+        "stratified": true
+      },
+      "normalization": "min_max_0_to_16_raw_pixel_integers",
+      "representation": "flattened_8x8_grayscale_pixel_array",
+      "target_metric_name": "accuracy",
+      "metric_direction": "GREATER",
+      "target_metric_threshold": 0.9,
+      "task_fingerprint": "6d0c3897f0d957b5f9c7a58bf4ecc82bac3a794313784d789f3eb50ee5bd75f8"
+    },
+    "digits_5_9": {
+      "task_id": "digits_5_9",
+      "task_family": "DIGITS_SPATIAL",
+      "generation_algorithm": "sklearn.datasets.load_digits:subset_5_9",
+      "generator_version": "1.0.0",
+      "dataset_seed": 42,
+      "sample_count_train": 40,
+      "sample_count_val": 160,
+      "sample_count_test": 160,
+      "feature_dimensions": [
+        64
+      ],
+      "label_construction": "shifted_digit_classes_0_to_4_from_5_to_9",
+      "noise_parameters": {
+        "type": "none",
+        "variance": 0.0
+      },
+      "train_val_test_splits": {
+        "train_size": 40,
+        "val_size": 160,
+        "test_size": 160,
+        "stratified": true
+      },
+      "normalization": "min_max_0_to_16_raw_pixel_integers",
+      "representation": "flattened_8x8_grayscale_pixel_array",
+      "target_metric_name": "accuracy",
+      "metric_direction": "GREATER",
+      "target_metric_threshold": 0.9,
+      "task_fingerprint": "4a82a7eef54111b6e192a317ebb6eccb43096a2228af91ca2d5247a427fbaf69"
+    },
+    "digits_all_10": {
+      "task_id": "digits_all_10",
+      "task_family": "DIGITS_SPATIAL",
+      "generation_algorithm": "sklearn.datasets.load_digits:full_10_class",
+      "generator_version": "1.0.0",
+      "dataset_seed": 42,
+      "sample_count_train": 60,
+      "sample_count_val": 200,
+      "sample_count_test": 200,
+      "feature_dimensions": [
+        64
+      ],
+      "label_construction": "raw_digit_classes_0_to_9",
+      "noise_parameters": {
+        "type": "none",
+        "variance": 0.0
+      },
+      "train_val_test_splits": {
+        "train_size": 60,
+        "val_size": 200,
+        "test_size": 200,
+        "stratified": true
+      },
+      "normalization": "min_max_0_to_16_raw_pixel_integers",
+      "representation": "flattened_8x8_grayscale_pixel_array",
+      "target_metric_name": "accuracy",
+      "metric_direction": "GREATER",
+      "target_metric_threshold": 0.85,
+      "task_fingerprint": "1f752fd7042fc61c41845aac54ea72aa19eb2b3a36130c76f949214311628feb"
+    },
+    "synthetic_ecg_lead1": {
+      "task_id": "synthetic_ecg_lead1",
+      "task_family": "ECG_TEMPORAL",
+      "generation_algorithm": "researchforge.benchmarks.tasks:synthetic_ecg_task",
+      "generator_version": "1.0.0",
+      "dataset_seed": 42,
+      "sample_count_train": 80,
+      "sample_count_val": 310,
+      "sample_count_test": 310,
+      "feature_dimensions": [
+        96
+      ],
+      "label_construction": "binary_normal_vs_arrhythmia_0_1",
+      "noise_parameters": {
+        "type": "gaussian",
+        "sigma": 0.3
+      },
+      "train_val_test_splits": {
+        "total_samples": 700,
+        "train_size": 80,
+        "val_size": 310,
+        "test_size": 310
+      },
+      "normalization": "continuous_zero_centered_waveform",
+      "representation": "1d_temporal_signal_lead_1",
+      "target_metric_name": "accuracy",
+      "metric_direction": "GREATER",
+      "target_metric_threshold": 0.82,
+      "task_fingerprint": "38b7c819237c61d914b4e4dc83648c58c005fd485c1b3293ce4b502fb92b1109"
+    },
+    "synthetic_ecg_lead2": {
+      "task_id": "synthetic_ecg_lead2",
+      "task_family": "ECG_TEMPORAL",
+      "generation_algorithm": "researchforge.benchmarks.continuity.tasks:synthetic_ecg_lead2_task",
+      "generator_version": "1.0.0",
+      "dataset_seed": 42,
+      "sample_count_train": 80,
+      "sample_count_val": 310,
+      "sample_count_test": 310,
+      "feature_dimensions": [
+        96
+      ],
+      "label_construction": "binary_shifted_morphology_0_1",
+      "noise_parameters": {
+        "type": "gaussian_with_jitter",
+        "sigma": 0.35,
+        "jitter_range": 0.03
+      },
+      "train_val_test_splits": {
+        "total_samples": 700,
+        "train_size": 80,
+        "val_size": 310,
+        "test_size": 310
+      },
+      "normalization": "continuous_zero_centered_waveform",
+      "representation": "1d_temporal_signal_lead_2",
+      "target_metric_name": "accuracy",
+      "metric_direction": "GREATER",
+      "target_metric_threshold": 0.78,
+      "task_fingerprint": "489ef5fa14eee31fe699f47fae11aa892744afa5ce620378414c1a548f11c143"
+    },
+    "xor_parity_8bit": {
+      "task_id": "xor_parity_8bit",
+      "task_family": "XOR_TABULAR",
+      "generation_algorithm": "synthetic_noisy_parity_8bit_generator",
+      "generator_version": "1.0.0",
+      "dataset_seed": 42,
+      "sample_count_train": 60,
+      "sample_count_val": 270,
+      "sample_count_test": 270,
+      "feature_dimensions": [
+        8
+      ],
+      "label_construction": "odd_sum_parity_modulo_2",
+      "noise_parameters": {
+        "type": "additive_gaussian_perturbation",
+        "sigma": 0.15
+      },
+      "train_val_test_splits": {
+        "total_samples": 600,
+        "train_size": 60,
+        "val_size": 270,
+        "test_size": 270
+      },
+      "normalization": "noisy_continuous_features",
+      "representation": "tabular_discrete_continuous_vector",
+      "target_metric_name": "accuracy",
+      "metric_direction": "GREATER",
+      "target_metric_threshold": 0.85,
+      "task_fingerprint": "617b9a9ab06279cb435c2e6d0f3adb8b0e9c9c50f2e4b490a25d06285e91c375"
+    }
+  },
+  "task_families": {
+    "digits_0_4": "DIGITS_SPATIAL",
+    "digits_5_9": "DIGITS_SPATIAL",
+    "digits_all_10": "DIGITS_SPATIAL",
+    "synthetic_ecg_lead1": "ECG_TEMPORAL",
+    "synthetic_ecg_lead2": "ECG_TEMPORAL",
+    "xor_parity_8bit": "XOR_TABULAR"
+  },
+  "conditions": {
+    "COLD_START": {
+      "condition_id": "COLD_START",
+      "memory_enabled": true,
+      "trajectory_enabled": false,
+      "adaptive_retrieval_enabled": false,
+      "cross_task_experience_allowed": false,
+      "research_policy_learning_enabled": false,
+      "prior_task_information_available": false,
+      "description": "Fresh researcher state initialized for every task with standard within-task machinery."
+    },
+    "NO_MEMORY": {
+      "condition_id": "NO_MEMORY",
+      "memory_enabled": false,
+      "trajectory_enabled": false,
+      "adaptive_retrieval_enabled": false,
+      "cross_task_experience_allowed": false,
+      "research_policy_learning_enabled": false,
+      "prior_task_information_available": false,
+      "description": "Memory mechanisms explicitly disabled within and across tasks."
+    },
+    "FLAT_ECRM": {
+      "condition_id": "FLAT_ECRM",
+      "memory_enabled": true,
+      "trajectory_enabled": false,
+      "adaptive_retrieval_enabled": false,
+      "cross_task_experience_allowed": true,
+      "research_policy_learning_enabled": false,
+      "prior_task_information_available": true,
+      "description": "Unfiltered flat empirical evidence (ECRM) accumulated across sequential prior tasks."
+    },
+    "TRAJECTORY_MEMORY": {
+      "condition_id": "TRAJECTORY_MEMORY",
+      "memory_enabled": true,
+      "trajectory_enabled": true,
+      "adaptive_retrieval_enabled": false,
+      "cross_task_experience_allowed": true,
+      "research_policy_learning_enabled": false,
+      "prior_task_information_available": true,
+      "description": "Trajectory sequence memory accumulated and retrieved without confidence-based backoff."
+    },
+    "ADAPTIVE_TRAJECTORY": {
+      "condition_id": "ADAPTIVE_TRAJECTORY",
+      "memory_enabled": true,
+      "trajectory_enabled": true,
+      "adaptive_retrieval_enabled": true,
+      "cross_task_experience_allowed": true,
+      "research_policy_learning_enabled": false,
+      "prior_task_information_available": true,
+      "description": "Context-sensitive adaptive trajectory retrieval with similarity thresholds and backoff."
+    },
+    "CONTINUOUS_EXPERIENCE": {
+      "condition_id": "CONTINUOUS_EXPERIENCE",
+      "memory_enabled": true,
+      "trajectory_enabled": true,
+      "adaptive_retrieval_enabled": true,
+      "cross_task_experience_allowed": true,
+      "research_policy_learning_enabled": true,
+      "prior_task_information_available": true,
+      "description": "Unified continuous experience transfer with cross-task research-policy learning enabled."
+    }
+  },
+  "hypotheses": {
+    "H1": {
+      "hypothesis_id": "H1",
+      "title": "Primary Confirmatory: Same-Family Experience Benefit",
+      "test_condition": "CONTINUOUS_EXPERIENCE",
+      "control_condition": "COLD_START",
+      "regime": "SAME_FAMILY",
+      "endpoint": "decision_quality",
+      "direction": "GREATER",
+      "contrast_formula": "DQ(CONTINUOUS_EXPERIENCE, SAME_FAMILY) - DQ(COLD_START, NO_PRIOR_EXPERIENCE) > 0",
+      "horizon_definition": null
+    },
+    "H2": {
+      "hypothesis_id": "H2",
+      "title": "Secondary: Cross-Family Negative Transfer",
+      "test_condition": "CONTINUOUS_EXPERIENCE",
+      "control_condition": "COLD_START",
+      "regime": "CROSS_FAMILY",
+      "endpoint": "decision_quality",
+      "direction": "LESS",
+      "contrast_formula": "DQ(CONTINUOUS_EXPERIENCE, CROSS_FAMILY) - DQ(COLD_START, NO_PRIOR_EXPERIENCE) < 0",
+      "horizon_definition": null
+    },
+    "H3": {
+      "hypothesis_id": "H3",
+      "title": "Secondary: Adaptive Retrieval Safety",
+      "test_condition": "ADAPTIVE_TRAJECTORY",
+      "control_condition": "TRAJECTORY_MEMORY",
+      "regime": "CROSS_FAMILY",
+      "endpoint": "negative_transfer_rate",
+      "direction": "LESS",
+      "contrast_formula": "NTR(ADAPTIVE_TRAJECTORY, CROSS_FAMILY) - NTR(TRAJECTORY_MEMORY, CROSS_FAMILY) < 0",
+      "horizon_definition": null
+    },
+    "H4": {
+      "hypothesis_id": "H4",
+      "title": "Secondary: Non-Monotonic Experience Accumulation",
+      "test_condition": "CONTINUOUS_EXPERIENCE",
+      "control_condition": "COLD_START",
+      "regime": null,
+      "endpoint": "decision_quality",
+      "direction": "NON_MONOTONIC",
+      "contrast_formula": "C1 = DQ_1 - DQ_0 > 0 and C2 = DQ_2 - DQ_1 < 0; Ccomp = DQ_1 - (DQ_0 + DQ_2) / 2 > 0",
+      "horizon_definition": {
+        "dq0": "Target evaluated with zero prior tasks (sequence position 0, fresh start)",
+        "dq1": "Target evaluated after one eligible prior task (sequence position 1)",
+        "dq2": "Target evaluated after two eligible prior tasks (sequence position 2)",
+        "experience_condition": "CONTINUOUS_EXPERIENCE",
+        "composite_contrast": "DQ_1 - (DQ_0 + DQ_2) / 2",
+        "decision_rule": "H4 supported if C1 > 0 and C2 < 0 strictly under CONTINUOUS_EXPERIENCE"
+      }
+    }
+  },
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "orderings": [
+    "forward",
+    "reverse",
+    "cross_first"
+  ],
+  "budget": {
+    "n_tasks": 6,
+    "n_seeds": 5,
+    "n_orderings": 3,
+    "n_conditions": 6,
+    "generations_per_task": 10,
+    "population_size": 6,
+    "timeout_per_trial_seconds": 30.0,
+    "trial_definition": "one population-member evaluation (individual candidate genome evaluation)",
+    "wallclock_semantics": "theoretical serialized upper bound assuming worst-case timeout per trial, not a predicted wall-clock runtime",
+    "sequences_per_condition": 15,
+    "task_evaluations_per_condition": 90,
+    "trials_per_task_evaluation": 60,
+    "trials_per_condition": 5400,
+    "total_benchmark_trials": 32400,
+    "max_wallclock_seconds_per_condition": 162000.0,
+    "max_total_wallclock_seconds": 972000.0
+  },
+  "exclusion_policy": {
+    "policy_name": "canonical_endpoint_specific_exclusion",
+    "allow_post_hoc_task_removal": false,
+    "allow_post_hoc_seed_removal": false,
+    "allow_post_hoc_ordering_removal": false,
+    "allow_outlier_deletion": false,
+    "allow_bad_result_deletion": false,
+    "allow_manual_removal": false,
+    "rule_statement": "Invalid execution artifacts are retained permanently and excluded from the affected endpoint only when the pre-registered validity rule declares them ineligible."
+  },
+  "failure_categories": [
+    "VALID_COMPLETED",
+    "SCIENTIFIC_FAILURE",
+    "EXECUTION_FAILURE",
+    "INVALID_RUN",
+    "INCONCLUSIVE_RUN"
+  ],
+  "is_sealed": true,
+  "sealed_at": "2026-09-05T18:28:00.256071+00:00",
+  "cohort_fingerprint": "591e1a0bf62d9f0e9bfe7d717b66582dd89b1c7cc65d45082ff26607bc031e66"
+}

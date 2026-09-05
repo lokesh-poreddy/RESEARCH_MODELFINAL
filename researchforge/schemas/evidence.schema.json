@@ -17,7 +17,20 @@
     "claim_relationship": { "type": ["string", "null"] },
     "confidence": { "type": ["number", "null"] },
     "snippet": { "type": ["string", "null"] },
-    "metadata": { "type": ["object", "null"] }
+    "metadata": { "type": ["object", "null"] },
+    "evidence_type": { "type": ["string", "null"] },
+    "source_type": { "type": ["string", "null"] },
+    "claim_id": { "type": ["string", "null"] },
+    "relation": { "type": ["string", "null"] },
+    "provenance_id": { "type": ["string", "null"] },
+    "quality": { "type": ["object", "null"] },
+    "originating_vrdeg_node_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "originating_experiment_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "originating_run_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "originating_outcome_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "originating_trajectory_ids": { "type": ["array", "null"], "items": { "type": "string" } },
+    "created_at": { "type": ["number", "null"] }
   },
   "additionalProperties": false
 }
+

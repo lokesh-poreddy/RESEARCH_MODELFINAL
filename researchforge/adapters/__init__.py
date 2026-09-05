@@ -72,6 +72,14 @@ from .validation import (                                  # noqa: F401
     ValidationError,
 )
 
+# Manifest (Phase 10)
+from .manifest import (                                    # noqa: F401
+    AdapterCapability,
+    AdapterDeclaration,
+    CanonicalAdapterManifest,
+    ImplementationStatus,
+)
+
 __all__ = [
     "ADAPTER_API_VERSION",
     "ADAPTER_SCHEMA_VERSION",
@@ -92,4 +100,7 @@ __all__ = [
     # Validation
     "validate_graph_backend", "validate_vector_backend",
     "ValidationReport", "ValidationError",
+    # Manifest
+    "CanonicalAdapterManifest", "AdapterDeclaration",
+    "ImplementationStatus", "AdapterCapability",
 ]

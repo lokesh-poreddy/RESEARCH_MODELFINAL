@@ -10,6 +10,13 @@ RF-1.0.0-alpha.2.1:
 from .ecrm import ECRM
 from .record import MemoryRecord, MEMORY_RECORD_SCHEMA
 from .trajectory import TrajectoryMemory, TrajectoryRecord
+from .adaptive_trajectory import (
+    AdaptiveTrajectoryMemory,
+    AdaptiveTrajectoryRecord,
+    ContextualRetrievalResult,
+    FailureCheckResult,
+    new_adaptive_trajectory_id,
+)
 
 __all__ = [
     "ECRM",
@@ -17,4 +24,10 @@ __all__ = [
     "MEMORY_RECORD_SCHEMA",
     "TrajectoryMemory",
     "TrajectoryRecord",
+    "AdaptiveTrajectoryMemory",
+    "AdaptiveTrajectoryRecord",
+    "ContextualRetrievalResult",
+    "FailureCheckResult",
+    "new_adaptive_trajectory_id",
 ]
+
