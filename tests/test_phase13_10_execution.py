@@ -1,16 +1,19 @@
 """Phase 13.10 pre-execution attestation and authorization gate tests."""
 from dataclasses import replace
+import subprocess
 
 import pytest
 
 from researchforge.benchmarks.rf_flex_confirmatory import RFFlexConfirmatoryProtocol
 from researchforge.benchmarks.rf_flex_execution import (
+    RFExecutionGateError,
     RFExecutionNotAuthorizedError,
     RFPreExecutionAttestation,
     assert_execution_ready,
     authorize_attestation,
     execute_authorized,
 )
+from researchforge.benchmarks.rf_flex_execution import create_release_seal
 
 
 def _attestation(clean=True, authorized=False):
@@ -59,3 +62,38 @@ def test_authorization_changes_only_attestation_status_fields():
     assert authorized.attestation_fingerprint != initial.attestation_fingerprint
     assert_execution_ready(authorized, RFFlexConfirmatoryProtocol())
     assert execute_authorized(authorized, RFFlexConfirmatoryProtocol(), lambda: "executed") == "executed"
+
+
+def test_release_seal_rejects_dirty_repository(tmp_path):
+    protocol_path = tmp_path / "protocol.json"
+    protocol = RFFlexConfirmatoryProtocol()
+    protocol.freeze(protocol_path)
+
+    with pytest.raises(RFExecutionGateError, match="clean worktree"):
+        create_release_seal(protocol_path, ".", tmp_path / "seal")
+
+
+def test_release_seal_binds_clean_commit(tmp_path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "requirements.txt").write_text("numpy>=1.24\n")
+    subprocess.run(["git", "init", "-q"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "user.name", "RF Test"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "requirements.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "commit", "-qm", "clean execution release"], cwd=repo, check=True)
+
+    protocol_path = tmp_path / "protocol.json"
+    protocol = RFFlexConfirmatoryProtocol()
+    protocol.freeze(protocol_path)
+    seal = create_release_seal(protocol_path, repo, tmp_path / "seal")
+
+    assert seal.dirty_worktree is False
+    assert seal.execution_authorized is False
+    assert len(seal.software_commit) == 40
+    assert seal.planned_trajectory_groups == 720
+    assert set(seal.artifact_hashes) == {
+        "protocol_file_sha256",
+        "task_manifest_file_sha256",
+        "attestation_file_sha256",
+    }

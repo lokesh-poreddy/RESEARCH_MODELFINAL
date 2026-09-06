@@ -159,6 +159,77 @@ class RFPreExecutionAttestation:
         return cls(**data)
 
 
+@dataclass(frozen=True)
+class RFExecutionReleaseSeal:
+    """Clean-commit release seal; authorization remains permanently false here."""
+
+    seal_version: str
+    created_at: str
+    protocol_fingerprint: str
+    software_commit: str
+    dirty_worktree: bool
+    task_manifest_fingerprint: str
+    environment_fingerprint: str
+    artifact_hashes: Dict[str, str]
+    planned_trajectory_groups: int
+    planned_conditions: int
+    planned_tasks: int
+    planned_seeds: int
+    planned_orderings: int
+    pre_execution_attestation_fingerprint: str
+    execution_authorized: bool = False
+    seal_fingerprint: str = ""
+
+    def unsigned_dict(self) -> Dict[str, Any]:
+        return {
+            "seal_version": self.seal_version,
+            "created_at": self.created_at,
+            "protocol_fingerprint": self.protocol_fingerprint,
+            "software_commit": self.software_commit,
+            "dirty_worktree": self.dirty_worktree,
+            "task_manifest_fingerprint": self.task_manifest_fingerprint,
+            "environment_fingerprint": self.environment_fingerprint,
+            "artifact_hashes": dict(self.artifact_hashes),
+            "planned_trajectory_groups": self.planned_trajectory_groups,
+            "planned_conditions": self.planned_conditions,
+            "planned_tasks": self.planned_tasks,
+            "planned_seeds": self.planned_seeds,
+            "planned_orderings": self.planned_orderings,
+            "pre_execution_attestation_fingerprint": self.pre_execution_attestation_fingerprint,
+            "execution_authorized": self.execution_authorized,
+        }
+
+    def fingerprint(self) -> str:
+        return _fingerprint(self.unsigned_dict())
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "seal_version": self.seal_version,
+            "created_at": self.created_at,
+            "protocol_fingerprint": self.protocol_fingerprint,
+            "software_commit": self.software_commit,
+            "dirty_worktree": self.dirty_worktree,
+            "task_manifest_fingerprint": self.task_manifest_fingerprint,
+            "environment_fingerprint": self.environment_fingerprint,
+            "artifact_hashes": dict(self.artifact_hashes),
+            "planned_trajectory_groups": self.planned_trajectory_groups,
+            "planned_conditions": self.planned_conditions,
+            "planned_tasks": self.planned_tasks,
+            "planned_seeds": self.planned_seeds,
+            "planned_orderings": self.planned_orderings,
+            "pre_execution_attestation_fingerprint": self.pre_execution_attestation_fingerprint,
+            "execution_authorized": self.execution_authorized,
+            "seal_fingerprint": self.seal_fingerprint or self.fingerprint(),
+        }
+
+    def write(self, output_path: Path | str) -> Dict[str, Any]:
+        output = Path(output_path)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        data = self.to_dict()
+        output.write_text(json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        return data
+
+
 def prepare_attestation(protocol_path: Path | str, repo_root: Path | str) -> RFPreExecutionAttestation:
     root = Path(repo_root)
     protocol_file = Path(protocol_path)
@@ -209,6 +280,51 @@ def authorize_attestation(attestation: RFPreExecutionAttestation, authorized_by:
         authorization_timestamp=datetime.now(timezone.utc).isoformat(),
     )
     return replace(authorized, attestation_fingerprint=authorized.fingerprint())
+
+
+def create_release_seal(
+    protocol_path: Path | str,
+    repo_root: Path | str,
+    output_dir: Path | str,
+) -> RFExecutionReleaseSeal:
+    """Regenerate a clean-commit attestation and create an unauthorized release seal."""
+    root = Path(repo_root)
+    output = Path(output_dir)
+    protocol_file = Path(protocol_path)
+    attestation = prepare_attestation(protocol_file, root)
+    if not attestation.preflight_pass or attestation.dirty_worktree:
+        raise RFExecutionGateError(
+            "RF-FLEX release seal requires a clean worktree; no seal was created"
+        )
+    output.mkdir(parents=True, exist_ok=True)
+    manifest = task_manifest(root)
+    manifest_file = output / "rf_flex_13_10_task_manifest.json"
+    manifest_file.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    attestation_file = output / "rf_flex_13_10_pre_execution_attestation.json"
+    attestation.write(attestation_file)
+    environment = environment_identity(root)
+    seal = RFExecutionReleaseSeal(
+        seal_version="13.11.0",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        protocol_fingerprint=attestation.phase13_9_protocol_fingerprint,
+        software_commit=attestation.software_commit,
+        dirty_worktree=False,
+        task_manifest_fingerprint=manifest["manifest_fingerprint"],
+        environment_fingerprint=environment["environment_fingerprint"],
+        artifact_hashes={
+            "protocol_file_sha256": attestation.protocol_file_sha256,
+            "task_manifest_file_sha256": _file_sha256(manifest_file),
+            "attestation_file_sha256": _file_sha256(attestation_file),
+        },
+        planned_trajectory_groups=attestation.planned_trajectory_groups,
+        planned_conditions=attestation.planned_conditions,
+        planned_tasks=attestation.planned_tasks,
+        planned_seeds=attestation.planned_seeds,
+        planned_orderings=attestation.planned_orderings,
+        pre_execution_attestation_fingerprint=attestation.attestation_fingerprint,
+        execution_authorized=False,
+    )
+    return replace(seal, seal_fingerprint=seal.fingerprint())
 
 
 def assert_execution_ready(attestation: RFPreExecutionAttestation, protocol: RFFlexConfirmatoryProtocol) -> None:
