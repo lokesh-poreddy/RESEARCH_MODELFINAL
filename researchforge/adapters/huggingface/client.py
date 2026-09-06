@@ -260,7 +260,7 @@ class HFInferenceClient:
             "messages": messages,
         }
         payload.update(kwargs)
-        url = f"https://api-inference.huggingface.co/v1/chat/completions"
+        url = f"https://router.huggingface.co/v1/chat/completions"
         return self._make_request(url, payload)
 
     def embed(self, model_id: str, texts: list) -> Any:

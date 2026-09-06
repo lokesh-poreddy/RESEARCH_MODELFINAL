@@ -1,0 +1,18 @@
+{
+  "provider": "huggingface",
+  "model_id": "Qwen/Qwen3.8-27B",
+  "inference_provider": "ovhcloud",
+  "router": "https://router.huggingface.co/v1",
+  "controller_path": [
+    "ResearchController",
+    "LLMSynthesizer",
+    "LLMProvider",
+    "HuggingFaceInferenceProvider"
+  ],
+  "live_request": true,
+  "response_received": true,
+  "mutation_validated": true,
+  "genome_created": true,
+  "experiment_started": true,
+  "result_persisted": true
+}

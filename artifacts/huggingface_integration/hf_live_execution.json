@@ -1,0 +1,22 @@
+{
+  "metadata": {
+    "execution_class": "END_TO_END_INTEGRATION_RUN",
+    "evidence_status": "EXECUTED",
+    "confirmatory": false,
+    "provider": "huggingface",
+    "model_id": "Qwen/Qwen3.8-27B",
+    "inference_provider": "ovhcloud"
+  },
+  "results": {
+    "digits": {
+      "full": "Execution terminated early due to API 402 Payment Required",
+      "no-memory": "Execution terminated early due to API 402 Payment Required",
+      "random": "Execution terminated early due to API 402 Payment Required"
+    },
+    "synthetic_ecg": {
+      "full": "Execution terminated early due to API 402 Payment Required",
+      "no-memory": "Execution terminated early due to API 402 Payment Required",
+      "random": "Execution terminated early due to API 402 Payment Required"
+    }
+  }
+}

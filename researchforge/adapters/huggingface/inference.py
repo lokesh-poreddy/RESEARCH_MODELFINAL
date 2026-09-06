@@ -141,16 +141,34 @@ class HuggingFaceInferenceProvider:
         try:
             client = self._get_client()
 
-            payload = {
-                "inputs": prompt,
-                "parameters": {
-                    "max_new_tokens": _max_tokens,
-                    "temperature": _temperature,
-                    "return_full_text": False,
-                },
-            }
-
-            raw = client.infer(_model_id, payload)
+            if ":" in _model_id or task == "chat-completion":
+                from openai import OpenAI
+                import os
+                
+                openai_client = OpenAI(
+                    base_url="https://router.huggingface.co/v1",
+                    api_key=os.environ.get("HF_TOKEN")
+                )
+                
+                messages = [{"role": "user", "content": prompt}]
+                completion = openai_client.chat.completions.create(
+                    model=_model_id,
+                    messages=messages,
+                    max_tokens=_max_tokens,
+                    temperature=_temperature,
+                    response_format={"type": "json_object"}
+                )
+                raw = completion.model_dump()
+            else:
+                payload = {
+                    "inputs": prompt,
+                    "parameters": {
+                        "max_new_tokens": _max_tokens,
+                        "temperature": _temperature,
+                        "return_full_text": False,
+                    },
+                }
+                raw = client.infer(_model_id, payload)
             latency = time.monotonic() - start
 
             # Parse response

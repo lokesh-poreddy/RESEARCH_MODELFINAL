@@ -1,0 +1,15 @@
+{
+  "mutations_applied": true,
+  "results": {
+    "digits": {
+      "full": "Execution terminated early due to API 402 Payment Required",
+      "no-memory": "Execution terminated early due to API 402 Payment Required",
+      "random": "Execution terminated early due to API 402 Payment Required"
+    },
+    "synthetic_ecg": {
+      "full": "Execution terminated early due to API 402 Payment Required",
+      "no-memory": "Execution terminated early due to API 402 Payment Required",
+      "random": "Execution terminated early due to API 402 Payment Required"
+    }
+  }
+}

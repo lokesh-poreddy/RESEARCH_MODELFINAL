@@ -82,12 +82,12 @@ Output ONLY the JSON object.
         # Extract JSON
         json_match = re.search(r'\{.*\}', text, re.DOTALL)
         if not json_match:
-            raise ValueError(f"Malformed LLM response: no JSON object found. Response: {text}")
+            raise ValueError(f"INVALID_LLM_PROPOSAL: no JSON object found. Response: {text}")
             
         try:
             intent = json.loads(json_match.group(0))
         except json.JSONDecodeError as e:
-            raise ValueError(f"Malformed LLM response: invalid JSON. Error: {e}")
+            raise ValueError(f"INVALID_LLM_PROPOSAL: invalid JSON. Error: {e}")
             
         mutation = intent.get("mutation", {})
         operator = mutation.get("operator", "")
@@ -105,13 +105,7 @@ Output ONLY the JSON object.
             if "data_pipeline" in params and isinstance(params["data_pipeline"], dict):
                 g.data_pipeline.update(params["data_pipeline"])
         else:
-            # Fallback to applying heuristic strategy if the LLM named a valid one
-            from ..genome.operators import STRATEGIES, apply_strategy
-            if operator in STRATEGIES:
-                g = apply_strategy(operator, base, rng, population=population)
-            else:
-                # Apply the requested strategy directly
-                g = apply_strategy(strategy, base, rng, population=population)
+            raise ValueError(f"INVALID_LLM_PROPOSAL: Unsupported operator '{operator}'.")
                 
         return g
 

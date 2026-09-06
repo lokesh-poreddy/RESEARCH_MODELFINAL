@@ -490,11 +490,19 @@ class ResearchController:
             # alpha.2.1: synthesizer still works with ModelGenome API;
             # convert parent TMG → ModelGenome for synthesis, then wrap back.
             parent_mg = parent.to_model_genome()
-            child_mg = self.synth.synthesize(strategy, parent_mg, self.rng,
-                                              [g.to_model_genome() for g in self.population])
-            child_mg.generation = gen
-            child = TargetModelGenome.from_model_genome(child_mg)
-            valid = unit_test(child_mg)
+            try:
+                child_mg = self.synth.synthesize(strategy, parent_mg, self.rng,
+                                                  [g.to_model_genome() for g in self.population])
+                child_mg.generation = gen
+                child = TargetModelGenome.from_model_genome(child_mg)
+                valid = unit_test(child_mg)
+                exception_msg = "invalid genome"
+            except ValueError as e:
+                child = parent.clone()
+                child_mg = parent_mg
+                child.tmg_id = f"failed-proposal-{gen}"
+                valid = False
+                exception_msg = str(e)
 
             exp = self.rdg.add_node(
                 "Experiment", f"Train/evaluate {child.model_type} (gen {gen})",
@@ -503,7 +511,7 @@ class ResearchController:
 
             if not valid:
                 exp_result = ExperimentResult(metric=0.0, success=False,
-                                               exception="invalid genome",
+                                               exception=exception_msg,
                                                target=self.task.target_metric)
             else:
                 exp_result = self._run_experiment(child)
