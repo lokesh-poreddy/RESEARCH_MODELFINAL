@@ -3,7 +3,7 @@ BaseAgent: shared LLM interface and utilities for all ResearchForge agents — v
 
 v2 changes:
 - InstructorConfig dataclass: per-agent role, retry, JSON requirement
-- Gemini / Google AI provider route
+- InstructorConfig dataclass: per-agent role, retry, JSON requirement
 - retry-with-backoff wrapper (up to settings.llm_max_retries attempts)
 - ManuscriptAgent mock returns structured text instead of leaking raw prompt
 """
@@ -37,7 +37,7 @@ class BaseAgent:
     """
     Abstract base class for all ResearchForge-ECRM agents.
     Wraps LLM calls with consistent prompt formatting, retry logic,
-    and provider routing (OpenAI / Anthropic / Gemini / mock).
+    and provider routing (OpenAI / Anthropic / mock).
     """
 
     def __init__(
@@ -78,18 +78,7 @@ class BaseAgent:
             except Exception as exc:
                 logger.warning("[%s] Anthropic unavailable: %s", self.name, exc)
 
-        elif provider == "gemini":
-            if not settings.google_api_key:
-                logger.info("[%s] No Google API key configured; using deterministic offline mode.", self.name)
-                return
-            try:
-                import google.generativeai as genai  # type: ignore
-                genai.configure(api_key=settings.google_api_key)
-                self._client = genai.GenerativeModel(settings.google_model)
-                self._model = settings.google_model
-                logger.info("[%s] Using Gemini (%s).", self.name, self._model)
-            except Exception as exc:
-                logger.warning("[%s] Gemini unavailable: %s", self.name, exc)
+
 
         else:
             logger.info("[%s] Running in mock LLM mode.", self.name)
@@ -119,8 +108,7 @@ class BaseAgent:
                     return self._openai_call(system_prompt, user_prompt, json_mode)
                 elif settings.llm_provider == "anthropic":
                     return self._anthropic_call(system_prompt, user_prompt)
-                elif settings.llm_provider == "gemini":
-                    return self._gemini_call(system_prompt, user_prompt)
+
             except Exception as exc:
                 last_exc = exc
                 wait = 2 ** (attempt - 1)  # 1s, 2s, 4s …
@@ -171,11 +159,7 @@ class BaseAgent:
         )
         return response.content[0].text
 
-    def _gemini_call(self, system: str, user: str) -> str:
-        """Google Gemini provider route."""
-        full_prompt = f"{system}\n\n{user}"
-        response = self._client.generate_content(full_prompt)
-        return response.text or ""
+
 
     # ── Deterministic offline mock ─────────────────────────────────────────────
 

@@ -53,6 +53,11 @@ class HFClientConfig:
         The token value itself is not stored in this object.
         """
         token = os.environ.get("HF_TOKEN", "").strip()
+        if not token:
+            token_path = os.path.expanduser("~/.cache/huggingface/token")
+            if os.path.exists(token_path):
+                with open(token_path, "r") as f:
+                    token = f.read().strip()
         live_mode = bool(token)
 
         return cls(
@@ -86,6 +91,11 @@ class HFClientConfig:
 def _get_hf_token() -> str:
     """Read HF_TOKEN from environment. Raises HFTokenMissingError if absent."""
     token = os.environ.get("HF_TOKEN", "").strip()
+    if not token:
+        token_path = os.path.expanduser("~/.cache/huggingface/token")
+        if os.path.exists(token_path):
+            with open(token_path, "r") as f:
+                token = f.read().strip()
     if not token:
         raise HFTokenMissingError()
     return token

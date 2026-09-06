@@ -38,9 +38,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o"
     anthropic_api_key: Optional[str] = None
     anthropic_model: str = "claude-3-5-sonnet-20241022"
-    google_api_key: Optional[str] = None          # Gemini / Google AI Studio
-    google_model: str = "gemini-2.0-flash"
-    # "openai" | "anthropic" | "gemini" | "mock"
+    # "openai" | "anthropic" | "mock"
     llm_provider: str = "openai"
     llm_max_tokens: int = 4096
     llm_temperature: float = 0.7

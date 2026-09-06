@@ -1,7 +1,7 @@
 {
   "metadata": {
     "execution_class": "END_TO_END_INTEGRATION_RUN",
-    "evidence_status": "EXECUTED",
+    "evidence_status": "MOCK-VERIFIED",
     "confirmatory": false,
     "provider": "huggingface"
   },

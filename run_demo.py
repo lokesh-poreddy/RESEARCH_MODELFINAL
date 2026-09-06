@@ -58,7 +58,7 @@ def main() -> None:
     out_data = {
         "metadata": {
             "execution_class": "END_TO_END_INTEGRATION_RUN",
-            "evidence_status": "EXECUTED",
+            "evidence_status": os.environ.get("RF_EVIDENCE_STATUS", "EXECUTED"),
             "confirmatory": False,
             "provider": os.environ.get("RF_LLM_PROVIDER", "heuristic"),
         },

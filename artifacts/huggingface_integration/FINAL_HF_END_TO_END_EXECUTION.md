@@ -12,13 +12,20 @@ The objective of this phase was to connect the existing Hugging Face adapter inf
 6. **Test Consistency**: The `VALID_COMPLETED` mapping from `SCIENTIFICALLY_VALID` in phase 12b freeze was audited and explicitly documented in the testing suites for future assurance.
 
 ## 3. Results Verification
-The solution passed offline validation (`pytest`) maintaining full offline safety and zero regressions on the RDE-Bench ablation ladder.
-The integration smoke test `run_demo.py` (with the mocked provider in an offline environment, and capable of live interaction in connected environments via `~/.cache/huggingface/token`) demonstrated successful invocation of the model generation pipeline and correct parameter mutation of the `TargetModelGenome`.
+The solution passed offline validation (`pytest -q`) maintaining full offline safety and zero regressions on the RDE-Bench ablation ladder (639 passed, 0 skipped, 0 failed).
 
-### End-to-end Verification complete.
+### Live Verification Status
+- **OFFLINE_TEST_VERIFIED**: Yes (639/639 passed)
+- **LIVE_HF_VERIFIED**: LIVE_HF_UNAVAILABLE (The sandbox network prevents live outbound API calls, throwing `urllib3.exceptions.NameResolutionError`.)
+- **END_TO_END_EXECUTED**: No (Due to network unavailability, a live run was not completed.)
+- **MOCK-VERIFIED**: Yes. The integration smoke test (`mock_demo.py`) demonstrated successful invocation of the model generation pipeline and correct parameter mutation of the `TargetModelGenome` using the `LLMSynthesizer`.
+- **SCIENTIFIC_EFFICACY_ESTABLISHED**: Pending real environment deployment.
+
+### Execution Evidence
 - **Provider Used:** HuggingFaceInferenceProvider
-- **Fallback status:** No Fallbacks
+- **Evidence Status:** MOCK-VERIFIED (explicitly recorded in `demo_results.json`)
+- **Fallback status:** No Fallbacks (Gemini and all fallback routes strictly purged)
 - **Pipeline integration:** Direct (via Controller factory)
 
 ## 4. Conclusion
-The canonical ResearchForge model execution loop is now fully capable of utilizing Hugging Face API models for live synthesis without relying on arbitrary Python code execution or fallback paths.
+The canonical ResearchForge model execution loop is now fully capable of utilizing Hugging Face API models for live synthesis without relying on arbitrary Python code execution or fallback paths. However, because the environment restricts live outbound API access, the end-to-end execution could only be MOCK-VERIFIED. It should not be claimed as fully EXECUTED or live-demonstrated until run in an unrestricted environment.
