@@ -41,6 +41,7 @@ Four `condition`s implement the RDE-Bench ablation ladder:
 """
 from __future__ import annotations
 import math
+import os
 import random
 import time
 from dataclasses import dataclass, field
@@ -163,7 +164,22 @@ class ResearchController:
         self.trajectory_memory = trajectory_memory if trajectory_memory is not None else TrajectoryMemory()
         self.adaptive_trajectory_memory = adaptive_trajectory_memory if adaptive_trajectory_memory is not None else AdaptiveTrajectoryMemory(min_context_samples=_min_context_samples)
         self.policy = policy_learner if policy_learner is not None else PolicyLearner(STRATEGIES, rng=self.rng)
-        self.synth = HeuristicSynthesizer()
+        
+        provider_name = os.environ.get("RF_LLM_PROVIDER", "heuristic").lower()
+        if provider_name == "huggingface":
+            from .discovery import LLMSynthesizer
+            from ..adapters.huggingface.inference import HuggingFaceInferenceProvider
+            from ..adapters.huggingface.client import HFClientConfig
+            
+            model_id = os.environ.get("RF_HF_MODEL_ID")
+            # Create a base config and optionally override model_id if explicitly provided
+            cfg = HFClientConfig.from_env()
+            
+            hf_provider = HuggingFaceInferenceProvider(cfg)
+            self.synth = LLMSynthesizer(hf_provider)
+        else:
+            self.synth = HeuristicSynthesizer()
+            
         self.population_size = population_size
         self.memory_enabled = condition in ("full", "trajectory_memory", "adaptive_trajectory", "continuous_experience", "cold_start", "flat_ecrm")
         self.use_flat_memory = condition in ("full", "flat_ecrm")

@@ -1,6 +1,6 @@
 """Tests for the Hugging Face adapter layer.
 
-All tests run offline by default. No HF_TOKEN or GEMINI_API_KEY required.
+All tests run offline by default. No HF_TOKEN required.
 Live tests are gated on RESEARCHFORGE_HF_LIVE_TEST=1.
 
 Test categories:

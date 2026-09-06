@@ -8,13 +8,12 @@ Connects to Hugging Face Inference API for:
 Provider mode selection:
     offline: HF_TOKEN not present → raises HFTokenMissingError when called live
     live:    HF_TOKEN present → uses HF Inference API
-    gemini:  GEMINI_API_KEY present → uses Gemini as fallback LLM
 
 Architecture position:
     LLMSynthesizer (future wiring)
         → HuggingFaceInferenceProvider.generate()
         → HFInferenceClient
-        → Hugging Face Inference API / Gemini API (fallback)
+        → Hugging Face Inference API
 
 All results carry HFProvenance records.
 No result should bypass ResearchPolicy or ECRM.
@@ -84,7 +83,6 @@ class HuggingFaceInferenceProvider:
     """Provider for HF-hosted model inference.
 
     Supports text generation (primary) and feature extraction.
-    Falls back to Gemini API if GEMINI_API_KEY is set and HF fails.
 
     Offline mode (no HF_TOKEN):
         generate() → raises HFTokenMissingError
@@ -112,7 +110,6 @@ class HuggingFaceInferenceProvider:
         """Generate text using the HF Inference API.
 
         In offline mode (no HF_TOKEN), raises HFTokenMissingError.
-        Falls back to Gemini if GEMINI_API_KEY present and HF fails.
 
         Parameters
         ----------
@@ -182,122 +179,21 @@ class HuggingFaceInferenceProvider:
             raise
         except Exception as exc:
             latency = time.monotonic() - start
-            # Try Gemini fallback
-            gemini_key = os.environ.get("GEMINI_API_KEY", "").strip()
-            if gemini_key:
-                return self._gemini_fallback(
-                    prompt=prompt,
-                    config_dict=config_dict,
-                    original_model_id=_model_id,
-                    task=task,
-                    original_error=str(type(exc).__name__),
-                )
-            raise
-
-    def _gemini_fallback(
-        self,
-        prompt: str,
-        config_dict: Dict[str, Any],
-        original_model_id: str,
-        task: str,
-        original_error: str,
-    ) -> InferenceResult:
-        """Use Gemini API as a fallback LLM if HF fails.
-
-        GEMINI_API_KEY is read from environment only. Never logged.
-        This fallback is explicitly provenance-recorded.
-        """
-        import json as _json
-        import urllib.request
-
-        api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-        if not api_key:
-            raise HFProviderError(
-                "HF inference failed and GEMINI_API_KEY is not set for fallback.",
-                model_id=original_model_id,
-                task=task,
-            )
-
-        start = time.monotonic()
-        gemini_model = "gemini-1.5-flash"
-        url = (
-            f"https://generativelanguage.googleapis.com/v1beta/models/"
-            f"{gemini_model}:generateContent?key={api_key}"
-        )
-
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-                "maxOutputTokens": self.config.max_new_tokens,
-                "temperature": self.config.temperature,
-            },
-        }
-
-        body = _json.dumps(payload).encode("utf-8")
-        headers = {"Content-Type": "application/json"}
-        req = urllib.request.Request(url, data=body, headers=headers, method="POST")
-
-        try:
-            with urllib.request.urlopen(req, timeout=self.config.timeout_s) as resp:
-                data = _json.loads(resp.read().decode("utf-8"))
-        except Exception as exc2:
-            latency = time.monotonic() - start
             prov = HFProvenance.build(
-                model_id=f"gemini/{gemini_model}",
+                model_id=_model_id,
                 task=task,
                 config_dict=config_dict,
                 execution_mode="live",
-                inference_provider="gemini-fallback",
                 latency_s=latency,
                 success=False,
                 error_code="NETWORK_ERROR",
-                notes=(
-                    f"Gemini fallback failed after HF error ({original_error}): "
-                    f"{type(exc2).__name__}"
-                ),
+                notes=f"HF Inference failed: {type(exc).__name__}",
             )
             raise HFProviderError(
-                f"Both HF ({original_error}) and Gemini fallback failed.",
-                model_id=original_model_id,
+                f"HF inference failed: {type(exc).__name__}",
+                model_id=_model_id,
                 task=task,
             )
-
-        latency = time.monotonic() - start
-
-        # Extract text from Gemini response
-        try:
-            text = (
-                data.get("candidates", [{}])[0]
-                .get("content", {})
-                .get("parts", [{}])[0]
-                .get("text", "")
-            )
-        except (IndexError, KeyError, TypeError):
-            text = str(data)
-
-        prov = HFProvenance.build(
-            model_id=f"gemini/{gemini_model}",
-            task=task,
-            config_dict=config_dict,
-            execution_mode="live",
-            inference_provider="gemini-fallback",
-            response_content={"length": len(text)},
-            latency_s=latency,
-            success=True,
-            notes=(
-                f"Gemini fallback used after HF error ({original_error}). "
-                f"Original HF model: {original_model_id!r}. "
-                f"Fallback is explicitly recorded in provenance."
-            ),
-        )
-        return InferenceResult(
-            text=text,
-            raw=data,
-            model_id=f"gemini/{gemini_model}",
-            task=task,
-            latency_s=latency,
-            provenance=prov,
-        )
 
     def embed(
         self,

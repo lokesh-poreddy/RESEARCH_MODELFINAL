@@ -55,9 +55,19 @@ def main() -> None:
         }
         for task_name, conds in report.items()
     }
+    out_data = {
+        "metadata": {
+            "execution_class": "END_TO_END_INTEGRATION_RUN",
+            "evidence_status": "EXECUTED",
+            "confirmatory": False,
+            "provider": os.environ.get("RF_LLM_PROVIDER", "heuristic"),
+        },
+        "results": serializable
+    }
+    
     out_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), args.out)
     with open(out_path, "w") as f:
-        json.dump(serializable, f, indent=2)
+        json.dump(out_data, f, indent=2)
     print(f"\nSaved detailed results (including per-seed best-so-far curves) to {args.out}")
 
 

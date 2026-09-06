@@ -3,9 +3,6 @@
 Reads HF_TOKEN from environment. Never logs, stores, or transmits the
 token value in any artifact, log line, or error message.
 
-Also supports GEMINI_API_KEY as a fallback LLM provider, read from environment
-with equal security discipline.
-
 Usage:
     config = HFClientConfig.from_env()
     client = get_hf_client(config)
@@ -94,10 +91,6 @@ def _get_hf_token() -> str:
     return token
 
 
-def _get_gemini_api_key() -> Optional[str]:
-    """Read GEMINI_API_KEY from environment. Returns None if absent."""
-    key = os.environ.get("GEMINI_API_KEY", "").strip()
-    return key if key else None
 
 
 def get_hf_client(config: Optional[HFClientConfig] = None) -> "HFInferenceClient":

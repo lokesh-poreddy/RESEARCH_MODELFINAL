@@ -38,31 +38,82 @@ class HeuristicSynthesizer:
 
 
 class LLMSynthesizer:
-    """Documented extension point, not wired to a live model here.
-
-    A production build would call an LLM (e.g. the Anthropic Messages API)
-    with the current RDG context plus retrieved ECRM memories, ask it to
-    propose a Model Genome edit as JSON, and validate the result against
-    `genome.model_genome.GENOME_SCHEMA` before use -- e.g.:
-
-        response = client.messages.create(
-            model="claude-...",
-            max_tokens=1024,
-            messages=[{"role": "user", "content": prompt_with_rdg_context}],
-        )
-        candidate = json.loads(extract_json(response.content))
-        jsonschema.validate(candidate, GENOME_SCHEMA)   # reject or repair on failure
-
-    That call site is exactly where this class's `synthesize()` would live;
-    everything upstream (ECRM retrieval, RDG bookkeeping) and downstream
-    (unit_test, evaluate_genome) is already synthesizer-agnostic.
+    """Uses an LLMProvider to propose genome mutations via structured JSON.
+    
+    Converts a mutation intent into a ModelGenome deterministically.
+    Does not allow arbitrary Python execution.
     """
 
-    def __init__(self, *_, **__):
-        raise NotImplementedError(
-            "LLMSynthesizer is a documented extension point, not wired up in "
-            "this offline reference implementation. Use HeuristicSynthesizer, "
-            "or implement synthesize() with a real API call (see docstring).")
+    def __init__(self, provider: 'LLMProvider'):
+        self.provider = provider
+
+    def synthesize(self, strategy: str, base: ModelGenome, rng: random.Random,
+                    population: List[ModelGenome]) -> ModelGenome:
+        import json
+        import re
+
+        prompt = f"""You are an automated machine learning research assistant.
+Your task is to mutate the given base model genome according to the provided strategy.
+
+Strategy: {strategy}
+Base Genome: {base.to_json()}
+
+You must output a structured mutation intent as a JSON object matching this schema:
+{{
+  "strategy": "{strategy}",
+  "base_genome_id": "{base.model_id}",
+  "mutation": {{
+    "operator": "update_parameters",
+    "parameters": {{
+        "hyperparameters": {{"key": "new_value"}},
+        "architecture": {{}},
+        "data_pipeline": {{}}
+    }}
+  }},
+  "reason": "Explain why this mutation aligns with the strategy.",
+  "expected_effect": "Explain the expected outcome."
+}}
+
+Output ONLY the JSON object.
+"""
+        result = self.provider.generate(prompt)
+        text = result.text
+        
+        # Extract JSON
+        json_match = re.search(r'\{.*\}', text, re.DOTALL)
+        if not json_match:
+            raise ValueError(f"Malformed LLM response: no JSON object found. Response: {text}")
+            
+        try:
+            intent = json.loads(json_match.group(0))
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Malformed LLM response: invalid JSON. Error: {e}")
+            
+        mutation = intent.get("mutation", {})
+        operator = mutation.get("operator", "")
+        params = mutation.get("parameters", {})
+        
+        # Deterministically convert intent to genome
+        g = base.clone()
+        g.parent_ids = [base.model_id]
+        
+        if operator == "update_parameters":
+            if "hyperparameters" in params and isinstance(params["hyperparameters"], dict):
+                g.hyperparameters.update(params["hyperparameters"])
+            if "architecture" in params and isinstance(params["architecture"], dict):
+                g.architecture.update(params["architecture"])
+            if "data_pipeline" in params and isinstance(params["data_pipeline"], dict):
+                g.data_pipeline.update(params["data_pipeline"])
+        else:
+            # Fallback to applying heuristic strategy if the LLM named a valid one
+            from ..genome.operators import STRATEGIES, apply_strategy
+            if operator in STRATEGIES:
+                g = apply_strategy(operator, base, rng, population=population)
+            else:
+                # Apply the requested strategy directly
+                g = apply_strategy(strategy, base, rng, population=population)
+                
+        return g
 
 
 def unit_test(genome: ModelGenome) -> bool:

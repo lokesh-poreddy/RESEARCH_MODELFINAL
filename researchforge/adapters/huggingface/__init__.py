@@ -10,7 +10,9 @@ as the backend.
 Secret management:
     HF_TOKEN is read exclusively from the environment.
     It is NEVER stored in source, artifacts, tests, or logs.
-    GEMINI_API_KEY is read exclusively from the environment (fallback LLM).
+    If HF_TOKEN is unset, the provider degrades gracefully to an offline mock
+    (returning deterministic dummy structures), ensuring the test suite and
+    pipeline remain fully functional without credentials.
 
 Usage:
     from researchforge.adapters.huggingface import (

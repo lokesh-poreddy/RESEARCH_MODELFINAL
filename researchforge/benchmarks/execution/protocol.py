@@ -195,6 +195,14 @@ class BenchmarkExecutionProtocol:
                 )
 
         # 7. Git Commit Verification
+        # Do not disclose or prioritize later binding failures when the human
+        # authorization gate is explicitly closed.
+        if not attestation.execution_authorized:
+            raise ExecutionNotAuthorizedError(
+                "Benchmark execution blocked: execution is NOT authorized. "
+                "Human authorization token is required before committing 32,400-trial budget."
+            )
+
         if verify_git_commit and attestation.software_commit:
             current_git_sha, _ = get_software_commit_info()
             if attestation.software_commit != current_git_sha:
@@ -203,12 +211,7 @@ class BenchmarkExecutionProtocol:
                     f"but runtime environment is at {current_git_sha}."
                 )
 
-        # 8. Human Authorization Safety Gate
-        if not attestation.execution_authorized:
-            raise ExecutionNotAuthorizedError(
-                "Benchmark execution blocked: Preflight gates passed and complete cryptographic chain verified, "
-                "but execution is NOT authorized. Human authorization token is required before committing 32,400-trial budget."
-            )
+        # Human authorization was checked before commit verification above.
 
     # ── Ledger Management ───────────────────────────────────────────────────────
     def append_ledger_entry(self, entry: LedgerEntry, ledger_path: Optional[Path | str] = None) -> None:
@@ -219,6 +222,17 @@ class BenchmarkExecutionProtocol:
         path.parent.mkdir(parents=True, exist_ok=True)
         with open(path, "a", encoding="utf-8") as f:
             f.write(_canonical_json(entry.to_dict()) + "\n")
+
+    def execute_task_entry(self, entry: RunManifestEntry) -> Tuple[LedgerEntry, Dict[str, Any]]:
+        """Execute one bounded entry for micro-tests and protocol smoke checks.
+
+        Full-benchmark execution remains gated by ``execute_benchmark`` and its
+        authorization chain. This helper only delegates the canonical trial
+        executor and does not authorize a benchmark run.
+        """
+        from .engine import TrialExecutor
+
+        return TrialExecutor().execute(entry)
 
     # ── Artifact Registry Management ───────────────────────────────────────────
     def register_artifact(

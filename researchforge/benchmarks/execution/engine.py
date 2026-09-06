@@ -50,7 +50,9 @@ class AuthorizationVerifier:
         sap_file_path: Optional[Path | str]
     ) -> None:
         if not attestation.execution_authorized:
-            raise ExecutionNotAuthorizedError("Human authorization is FALSE.")
+            raise ExecutionNotAuthorizedError(
+                "Benchmark execution blocked: execution is NOT authorized."
+            )
         
         recomputed_fp = attestation.compute_fingerprint()
         if attestation.attestation_fingerprint and attestation.attestation_fingerprint != recomputed_fp:

@@ -133,6 +133,10 @@ def setup_valid_files(tmp_path: Path):
                 seed=entry.seed,
                 ordering=entry.ordering,
                 execution_status=ExecutionStatus.COMPLETED.value,
+                # Note on Test-Fix Audit: 
+                # DependencyPolicy.SCIENTIFICALLY_VALID expresses the pre-flight requirement,
+                # whereas outcome_status="VALID_COMPLETED" is the post-flight realization
+                # recorded in the ledger. They align semantically.
                 outcome_status="VALID_COMPLETED",
                 best_metric=1.0,
                 decision_quality=1.0,
