@@ -1,0 +1,8 @@
+Claim ID,Claim,Evidence type,Artifact,Exact commit/execution ID,Status,Limitation
+C-001,ResearchForge has a versioned research-development architecture,Source + tests,RESEARCHFORGE_STATE.yaml; tests/,bd6428fe54f4a283edfd6e6f22cf42f600a8531d,IMPLEMENTED,Architecture is not efficacy
+C-002,RF-0.x to RF-1.0 trajectory behavior is regression-identical,Executed artifact,RF0_vs_RF1_regression.json,2026-09-03T17:47:39Z,EXECUTED,Scope is tested conditions/seeds only
+C-003,Historical RDE-Bench measured memory/ablation outcomes,Executed artifact,demo_results.json,historical artifact,EXECUTED,Not the RF-FLEX confirmatory design
+C-004,RF-FLEX pilot reconstructs integrated trajectories,Pilot artifact,Phase 13.8 trajectory_validation.json,Phase 13.8,EXECUTED / DESCRIPTIVE,No efficacy claim
+C-005,RF-FLEX confirmatory conditions improve research quality,Confirmatory artifact,Not available; execution locked,N/A,NOT ESTABLISHED,Requires authorized run
+C-006,Phase 13.9 defines a frozen confirmatory protocol,Frozen protocol,rf_flex_13_9_protocol.json / source,bd6428f,IMPLEMENTED / FROZEN,No results yet
+C-007,Phase 13.10/13.11 prevent unauthorized dirty execution,Tests + gate output,tests/test_phase13_10_execution.py,bd6428f,VERIFIED,Final seal requires clean release commit

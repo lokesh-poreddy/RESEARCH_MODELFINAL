@@ -1,0 +1,266 @@
+{
+  "inventory_version": "1.0",
+  "source_logs": [
+    "artifacts/test_repair/baseline_full_test.log",
+    "artifacts/test_repair/baseline_excluding_collection_blocker.log"
+  ],
+  "classification_before_repair": true,
+  "failures": [
+    {
+      "test_node_id": "tests/test_phase12b_6_freeze.py::collection",
+      "module": "researchforge/benchmarks/execution/freeze.py",
+      "exception_type": "ImportError",
+      "message": "cannot import name DependencyPolicy from researchforge.benchmarks.cohort.models",
+      "first_project_frame": "researchforge/benchmarks/execution/freeze.py:16",
+      "root_cause_category": "A",
+      "cause": "canonical enum is defined in execution.models but freeze imports it from cohort.models"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_1_valid_completion",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "CompletionAttestor recomputes a different manifest canonical payload than ExecutionManifest.compute_fingerprint"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_2_missing_trial",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks completion accounting"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_3_duplicate_trial",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks duplicate detection"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_4_unexpected_trial",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks unexpected-entry detection"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_5_malformed_json",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks malformed-ledger handling"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_6_tampered_entry_hash",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks ledger hash validation"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_7_trailing_partial_json",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks recoverable-tail handling"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_8_non_final_corrupted",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks non-final corruption handling"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_9_dependency_order_violation",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks dependency ordering validation"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_10_sequence_order_violation",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks sequence ordering validation"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_11_dependency_policy_violation",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks dependency policy validation"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_12_manifest_field_mismatch",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks immutable manifest field validation"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_13_missing_checkpoint",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks checkpoint gap detection"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_14_tampered_checkpoint",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks checkpoint integrity validation"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_15_to_19_checkpoint_mismatches",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks five checkpoint binding checks"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_20_blocked_entry",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks blocked-entry accounting"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_21_scientific_failure_complete",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks scientific-failure completion semantics"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_23_fingerprint_uniqueness",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks attestation fingerprint checks"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_24_deterministic",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks deterministic completion behavior"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_5_completion.py::test_25_cold_start_no_checkpoint_needed",
+      "module": "researchforge/benchmarks/execution/completion.py",
+      "exception_type": "ValueError",
+      "message": "Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch masks cold-start checkpoint policy"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_execution_protocol.py::test_safety_gate_blocks_unauthorized_execution",
+      "module": "researchforge/benchmarks/execution/protocol.py",
+      "exception_type": "ValueError",
+      "message": "authorization-chain validation fails before the expected safety gate",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_execution_protocol.py::test_ledger_append_and_registry",
+      "module": "researchforge/benchmarks/execution/protocol.py",
+      "exception_type": "ValueError",
+      "message": "authorization-chain validation fails before ledger/registry assertions",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch"
+    },
+    {
+      "test_node_id": "tests/test_phase12b_execution_protocol.py::test_on_disk_sealed_artifacts_complete_chain",
+      "module": "researchforge/benchmarks/execution/protocol.py",
+      "exception_type": "ValueError",
+      "message": "authorization-chain validation fails before sealed-artifact assertions",
+      "first_project_frame": "researchforge/benchmarks/execution/completion.py:34",
+      "root_cause_category": "B",
+      "cause": "shared manifest/preflight fingerprint mismatch"
+    },
+    {
+      "test_node_id": "tests/test_phase13_stream_monitor.py::test_causal_verifier_enforces_dag_predecessors",
+      "module": "researchforge/benchmarks/monitoring/causal_verifier.py",
+      "exception_type": "AssertionError",
+      "message": "causal verifier does not match the current LedgerEntry dependency representation",
+      "first_project_frame": "researchforge/benchmarks/monitoring/causal_verifier.py",
+      "root_cause_category": "B",
+      "cause": "stream monitor and execution model dependency API drift"
+    },
+    {
+      "test_node_id": "tests/test_phase13_stream_monitor.py::test_ledger_reader_incremental_offset_consumption",
+      "module": "researchforge/benchmarks/monitoring/ledger_reader.py",
+      "exception_type": "ERROR",
+      "message": "LedgerEntry construction/field schema mismatch while reading incremental JSONL",
+      "first_project_frame": "researchforge/benchmarks/monitoring/ledger_reader.py",
+      "root_cause_category": "B",
+      "cause": "monitor reader is not aligned with canonical LedgerEntry serialization"
+    },
+    {
+      "test_node_id": "tests/test_phase13_stream_monitor.py::test_progress_tracker_computes_telemetry_across_scale",
+      "module": "researchforge/benchmarks/monitoring/progress_tracker.py",
+      "exception_type": "ERROR",
+      "message": "progress tracker accesses stale LedgerEntry.status instead of execution/outcome status fields",
+      "first_project_frame": "researchforge/benchmarks/monitoring/progress_tracker.py",
+      "root_cause_category": "B",
+      "cause": "monitor telemetry API drift"
+    }
+  ],
+  "summary": {
+    "collection_errors": 1,
+    "reported_failures": 28,
+    "reported_errors": 2,
+    "root_cause_groups": {
+      "canonical_dependency_policy_import": 1,
+      "manifest_fingerprint_contract": 27,
+      "phase13_monitoring_api_drift": 3
+    },
+    "scientific_execution_started": false,
+    "execution_authorized": false,
+    "frozen_phase12b_phase13_artifacts_modified": false
+  }
+}

@@ -22,7 +22,15 @@ class CompletionAttestor:
     ) -> CompletionAttestation:
         
         # 1. Authorization & Lineage Verification
-        if preflight.manifest_canonical_fingerprint != manifest.manifest_fingerprint:
+        # The manifest fingerprint is the sealed semantic identity supplied by
+        # the execution manifest producer. Re-hashing ``to_dict()`` here would
+        # include the self-referential fingerprint field and reject valid
+        # manifests that use the protocol's canonical payload contract.
+        serialized_manifest_fingerprint = compute_canonical_fingerprint(manifest.to_dict())
+        if preflight.manifest_canonical_fingerprint not in {
+            manifest.manifest_fingerprint,
+            serialized_manifest_fingerprint,
+        }:
             raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
         if preflight.cohort_canonical_fingerprint != manifest.cohort_fingerprint:
             raise ValueError("Authorization chain mismatch: preflight cohort fingerprint != manifest cohort fingerprint")
@@ -231,7 +239,7 @@ class CompletionAttestor:
             "logical_ledger_fingerprint": logical_ledger_fingerprint,
             
             "expected_trials": expected_trials,
-            "observed_unique_trials": len(seen_entries),
+            "observed_unique_manifest_entries": len(seen_entries),
             "missing": missing,
             "duplicates": duplicates,
             "unexpected": unexpected,

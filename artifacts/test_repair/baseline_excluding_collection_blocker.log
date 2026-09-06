@@ -1,0 +1,322 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.13.0, pytest-9.0.3, pluggy-1.6.0
+rootdir: /Users/poreddylokeshreddy/Documents/college files/researchforge_ecrm
+configfile: pytest.ini
+testpaths: tests
+plugins: anyio-4.9.0, timeout-2.4.0, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 584 items
+
+tests/test_adapters.py ..............................                    [  5%]
+tests/test_adaptive_memory.py .................                          [  8%]
+tests/test_basic.py .................                                    [ 10%]
+tests/test_canonical_invariants.py ........                              [ 12%]
+tests/test_config.py ........                                            [ 13%]
+tests/test_domain_contracts.py ....                                      [ 14%]
+tests/test_domain_schemas.py ........                                    [ 15%]
+tests/test_ecrm.py ...................                                   [ 19%]
+tests/test_evidence_pipeline.py ........................                 [ 23%]
+tests/test_evolution.py .....................                            [ 26%]
+tests/test_experiment.py ....................                            [ 30%]
+tests/test_failure.py ..................                                 [ 33%]
+tests/test_genomes.py .................................                  [ 38%]
+tests/test_integration.py .................                              [ 41%]
+tests/test_no_cross_stack_imports.py .......                             [ 42%]
+tests/test_persistence_backend.py ..............................         [ 48%]
+tests/test_phase10_api.py ............                                   [ 50%]
+tests/test_phase11_benchmark_integrity.py .......                        [ 51%]
+tests/test_phase11_continuity.py ........                                [ 52%]
+tests/test_phase12_statistical_engine.py .........                       [ 54%]
+tests/test_phase12_statistical_plan.py ......                            [ 55%]
+tests/test_phase12b_4_recovery.py ............                           [ 57%]
+tests/test_phase12b_5_completion.py FFFFFFFFFFFFFFFFFFFFF.FFF            [ 61%]
+tests/test_phase12b_cohort_specification.py .............                [ 63%]
+tests/test_phase12b_execution_engine.py .................                [ 66%]
+tests/test_phase12b_execution_protocol.py ........F....F..F              [ 69%]
+tests/test_phase13_10_execution.py .....                                 [ 70%]
+tests/test_phase13_9_protocol.py ..                                      [ 70%]
+tests/test_phase13_boundary_and_hash_immutability.py ..                  [ 71%]
+tests/test_phase13_counterfactual.py ...                                 [ 71%]
+tests/test_phase13_dynamic_router.py ....                                [ 72%]
+tests/test_phase13_golden_regression.py ..                               [ 72%]
+tests/test_phase13_rf_flex.py ...                                        [ 73%]
+tests/test_phase13_stream_monitor.py EFE.                                [ 73%]
+tests/test_phase13_transfer_guard.py .....                               [ 74%]
+tests/test_phase3_experiments.py .......                                 [ 76%]
+tests/test_phase4_execution_safety.py ...                                [ 76%]
+tests/test_phase5_vrdeg.py ....                                          [ 77%]
+tests/test_phase5a_projector.py .....                                    [ 78%]
+tests/test_phase6_integration.py ...                                     [ 78%]
+tests/test_phase9_adversarial.py ......                                  [ 79%]
+tests/test_phase9_governance.py .....                                    [ 80%]
+tests/test_phase9_microbenchmark.py .                                    [ 80%]
+tests/test_phase9_persistence.py ...                                     [ 81%]
+tests/test_phase9_policy.py ........                                     [ 82%]
+tests/test_phase9_portfolio.py ....                                      [ 83%]
+tests/test_phase9_saturation.py .......                                  [ 84%]
+tests/test_phase9a_telemetry.py .....                                    [ 85%]
+tests/test_policy.py ............                                        [ 87%]
+tests/test_rdg.py ...........                                            [ 89%]
+tests/test_regression.py ........                                        [ 90%]
+tests/test_research.py ......                                            [ 91%]
+tests/test_retrieval.py ..........                                       [ 93%]
+tests/test_scientific_validity.py ......................                 [ 97%]
+tests/test_state.py ........                                             [ 98%]
+tests/test_state_transitions.py .....                                    [ 99%]
+tests/test_vrdeg_queries.py ....                                         [100%]
+
+==================================== ERRORS ====================================
+_____ ERROR at setup of test_ledger_reader_incremental_offset_consumption ______
+tests/test_phase13_stream_monitor.py:27: in sample_entry
+    return LedgerEntry(
+E   TypeError: LedgerEntry.__init__() got an unexpected keyword argument 'status'
+___ ERROR at setup of test_progress_tracker_computes_telemetry_across_scale ____
+tests/test_phase13_stream_monitor.py:27: in sample_entry
+    return LedgerEntry(
+E   TypeError: LedgerEntry.__init__() got an unexpected keyword argument 'status'
+=================================== FAILURES ===================================
+___________________________ test_1_valid_completion ____________________________
+tests/test_phase12b_5_completion.py:134: in test_1_valid_completion
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_____________________________ test_2_missing_trial _____________________________
+tests/test_phase12b_5_completion.py:151: in test_2_missing_trial
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+____________________________ test_3_duplicate_trial ____________________________
+tests/test_phase12b_5_completion.py:168: in test_3_duplicate_trial
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+___________________________ test_4_unexpected_trial ____________________________
+tests/test_phase12b_5_completion.py:184: in test_4_unexpected_trial
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+____________________________ test_5_malformed_json _____________________________
+tests/test_phase12b_5_completion.py:201: in test_5_malformed_json
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+__________________________ test_6_tampered_entry_hash __________________________
+tests/test_phase12b_5_completion.py:230: in test_6_tampered_entry_hash
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________________ test_7_trailing_partial_json _________________________
+tests/test_phase12b_5_completion.py:248: in test_7_trailing_partial_json
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+__________________________ test_8_non_final_corrupted __________________________
+tests/test_phase12b_5_completion.py:266: in test_8_non_final_corrupted
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+______________________ test_9_dependency_order_violation _______________________
+tests/test_phase12b_5_completion.py:284: in test_9_dependency_order_violation
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_______________________ test_10_sequence_order_violation _______________________
+tests/test_phase12b_5_completion.py:308: in test_10_sequence_order_violation
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_____________________ test_11_dependency_policy_violation ______________________
+tests/test_phase12b_5_completion.py:324: in test_11_dependency_policy_violation
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_______________________ test_12_manifest_field_mismatch ________________________
+tests/test_phase12b_5_completion.py:346: in test_12_manifest_field_mismatch
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+__________________________ test_13_missing_checkpoint __________________________
+tests/test_phase12b_5_completion.py:361: in test_13_missing_checkpoint
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________________ test_14_tampered_checkpoint __________________________
+tests/test_phase12b_5_completion.py:378: in test_14_tampered_checkpoint
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________ test_15_to_19_checkpoint_mismatches[kwarg0] __________________
+tests/test_phase12b_5_completion.py:400: in test_15_to_19_checkpoint_mismatches
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________ test_15_to_19_checkpoint_mismatches[kwarg1] __________________
+tests/test_phase12b_5_completion.py:400: in test_15_to_19_checkpoint_mismatches
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________ test_15_to_19_checkpoint_mismatches[kwarg2] __________________
+tests/test_phase12b_5_completion.py:400: in test_15_to_19_checkpoint_mismatches
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________ test_15_to_19_checkpoint_mismatches[kwarg3] __________________
+tests/test_phase12b_5_completion.py:400: in test_15_to_19_checkpoint_mismatches
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_________________ test_15_to_19_checkpoint_mismatches[kwarg4] __________________
+tests/test_phase12b_5_completion.py:400: in test_15_to_19_checkpoint_mismatches
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+____________________________ test_20_blocked_entry _____________________________
+tests/test_phase12b_5_completion.py:413: in test_20_blocked_entry
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+_____________________ test_21_scientific_failure_complete ______________________
+tests/test_phase12b_5_completion.py:429: in test_21_scientific_failure_complete
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+________________________ test_23_fingerprint_uniqueness ________________________
+tests/test_phase12b_5_completion.py:453: in test_23_fingerprint_uniqueness
+    att1 = CompletionAttestor.attest(m, p, path, ckpt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+____________________________ test_24_deterministic _____________________________
+tests/test_phase12b_5_completion.py:477: in test_24_deterministic
+    att1 = CompletionAttestor.attest(m, p, path, ckpt)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+___________________ test_25_cold_start_no_checkpoint_needed ____________________
+tests/test_phase12b_5_completion.py:503: in test_25_cold_start_no_checkpoint_needed
+    att = CompletionAttestor.attest(m, p, path, ckpt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+researchforge/benchmarks/execution/completion.py:34: in attest
+    raise ValueError("Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint")
+E   ValueError: Authorization chain mismatch: preflight manifest fingerprint != manifest fingerprint
+________________ test_safety_gate_blocks_unauthorized_execution ________________
+tests/test_phase12b_execution_protocol.py:260: in test_safety_gate_blocks_unauthorized_execution
+    assert "execution is NOT authorized" in str(exc.value)
+E   AssertionError: assert 'execution is NOT authorized' in 'Human authorization is FALSE.'
+E    +  where 'Human authorization is FALSE.' = str(ExecutionNotAuthorizedError('Human authorization is FALSE.'))
+E    +    where ExecutionNotAuthorizedError('Human authorization is FALSE.') = <ExceptionInfo ExecutionNotAuthorizedError('Human authorization is FALSE.') tblen=4>.value
+_______________________ test_ledger_append_and_registry ________________________
+tests/test_phase12b_execution_protocol.py:373: in test_ledger_append_and_registry
+    ledger_rec, next_state = proto.execute_task_entry(entry_micro)
+                             ^^^^^^^^^^^^^^^^^^^^^^^^
+E   AttributeError: 'BenchmarkExecutionProtocol' object has no attribute 'execute_task_entry'
+_________________ test_on_disk_sealed_artifacts_complete_chain _________________
+tests/test_phase12b_execution_protocol.py:553: in test_on_disk_sealed_artifacts_complete_chain
+    assert "execution is NOT authorized" in str(exc.value)
+E   AssertionError: assert 'execution is NOT authorized' in 'Software commit SHA mismatch! Attestation was signed for commit 88a61d422d12db9daeae17184b1b74c7708aeb40, but runtime environment is at bd6428fe54f4a283edfd6e6f22cf42f600a8531d.'
+E    +  where 'Software commit SHA mismatch! Attestation was signed for commit 88a61d422d12db9daeae17184b1b74c7708aeb40, but runtime environment is at bd6428fe54f4a283edfd6e6f22cf42f600a8531d.' = str(ExecutionNotAuthorizedError('Software commit SHA mismatch! Attestation was signed for commit 88a61d422d12db9daeae17184b1b74c7708aeb40, but runtime environment is at bd6428fe54f4a283edfd6e6f22cf42f600a8531d.'))
+E    +    where ExecutionNotAuthorizedError('Software commit SHA mismatch! Attestation was signed for commit 88a61d422d12db9daeae17184b1b74c7708aeb40, but runtime environment is at bd6428fe54f4a283edfd6e6f22cf42f600a8531d.') = <ExceptionInfo ExecutionNotAuthorizedError('Software commit SHA mismatch! Attestation was signed for commit 88a61d422d12db9daeae17184b1b74c7708aeb40, but runtime environment is at bd6428fe54f4a283edfd6e6f22cf42f600a8531d.') tblen=2>.value
+________________ test_causal_verifier_enforces_dag_predecessors ________________
+tests/test_phase13_stream_monitor.py:122: in test_causal_verifier_enforces_dag_predecessors
+    entry2 = LedgerEntry(
+E   TypeError: LedgerEntry.__init__() got an unexpected keyword argument 'status'
+=============================== warnings summary ===============================
+tests/test_basic.py::test_sandbox_kills_a_runaway_call_and_tracks_budget
+tests/test_phase3_experiments.py::test_timeout_path_with_sandbox
+tests/test_phase4_execution_safety.py::test_timeout_enforcement_and_timed_out_run
+tests/test_phase4_execution_safety.py::test_sandbox_delegation_and_provenance_capture
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/multiprocessing/popen_fork.py:67: DeprecationWarning: This process (pid=69407) is multi-threaded, use of fork() may lead to deadlocks in the child.
+    self.pid = os.fork()
+
+tests/test_phase10_api.py: 10 warnings
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/httpx/_client.py:690: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+tests/test_phase12_statistical_engine.py::test_primary_h1_no_multiplicity_penalty
+tests/test_phase12_statistical_engine.py::test_h4_non_monotonic_evaluation
+tests/test_phase12_statistical_engine.py::test_statistical_artifact_generation_against_phase11_pilot
+tests/test_phase12_statistical_engine.py::test_deterministic_statistical_replay
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/scipy/stats/_axis_nan_policy.py:586: UserWarning: scipy.stats.shapiro: Input data has range zero. The results may not be accurate.
+    res = hypotest_fun_out(*samples, **kwds)
+
+tests/test_regression.py::test_model_genome_old_api_unchanged
+  /Library/Frameworks/Python.framework/Versions/3.13/lib/python3.13/site-packages/sklearn/neural_network/_multilayer_perceptron.py:691: ConvergenceWarning: Stochastic Optimizer: Maximum iterations (50) reached and the optimization hasn't converged yet.
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_phase12b_5_completion.py::test_1_valid_completion - ValueEr...
+FAILED tests/test_phase12b_5_completion.py::test_2_missing_trial - ValueError...
+FAILED tests/test_phase12b_5_completion.py::test_3_duplicate_trial - ValueErr...
+FAILED tests/test_phase12b_5_completion.py::test_4_unexpected_trial - ValueEr...
+FAILED tests/test_phase12b_5_completion.py::test_5_malformed_json - ValueErro...
+FAILED tests/test_phase12b_5_completion.py::test_6_tampered_entry_hash - Valu...
+FAILED tests/test_phase12b_5_completion.py::test_7_trailing_partial_json - Va...
+FAILED tests/test_phase12b_5_completion.py::test_8_non_final_corrupted - Valu...
+FAILED tests/test_phase12b_5_completion.py::test_9_dependency_order_violation
+FAILED tests/test_phase12b_5_completion.py::test_10_sequence_order_violation
+FAILED tests/test_phase12b_5_completion.py::test_11_dependency_policy_violation
+FAILED tests/test_phase12b_5_completion.py::test_12_manifest_field_mismatch
+FAILED tests/test_phase12b_5_completion.py::test_13_missing_checkpoint - Valu...
+FAILED tests/test_phase12b_5_completion.py::test_14_tampered_checkpoint - Val...
+FAILED tests/test_phase12b_5_completion.py::test_15_to_19_checkpoint_mismatches[kwarg0]
+FAILED tests/test_phase12b_5_completion.py::test_15_to_19_checkpoint_mismatches[kwarg1]
+FAILED tests/test_phase12b_5_completion.py::test_15_to_19_checkpoint_mismatches[kwarg2]
+FAILED tests/test_phase12b_5_completion.py::test_15_to_19_checkpoint_mismatches[kwarg3]
+FAILED tests/test_phase12b_5_completion.py::test_15_to_19_checkpoint_mismatches[kwarg4]
+FAILED tests/test_phase12b_5_completion.py::test_20_blocked_entry - ValueErro...
+FAILED tests/test_phase12b_5_completion.py::test_21_scientific_failure_complete
+FAILED tests/test_phase12b_5_completion.py::test_23_fingerprint_uniqueness - ...
+FAILED tests/test_phase12b_5_completion.py::test_24_deterministic - ValueErro...
+FAILED tests/test_phase12b_5_completion.py::test_25_cold_start_no_checkpoint_needed
+FAILED tests/test_phase12b_execution_protocol.py::test_safety_gate_blocks_unauthorized_execution
+FAILED tests/test_phase12b_execution_protocol.py::test_ledger_append_and_registry
+FAILED tests/test_phase12b_execution_protocol.py::test_on_disk_sealed_artifacts_complete_chain
+FAILED tests/test_phase13_stream_monitor.py::test_causal_verifier_enforces_dag_predecessors
+ERROR tests/test_phase13_stream_monitor.py::test_ledger_reader_incremental_offset_consumption
+ERROR tests/test_phase13_stream_monitor.py::test_progress_tracker_computes_telemetry_across_scale
+============ 28 failed, 554 passed, 19 warnings, 2 errors in 14.64s ============
