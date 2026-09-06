@@ -8,10 +8,12 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Set
+from enum import Enum
 
 from ...domain.base import (
     _canonical_json,
@@ -144,42 +146,135 @@ class ExecutionLedgerWriter:
         self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self.ledger_path, "a", encoding="utf-8") as f:
             f.write(_canonical_json(entry.to_dict()) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
 
 
 class LedgerIntegrityValidator:
     """Ensures ledger entries are fully complete and valid."""
     @staticmethod
-    def is_resumably_complete(entry_dict: Dict[str, Any]) -> bool:
-        if entry_dict.get("execution_status") != ExecutionStatus.COMPLETED.value:
+    def is_resumably_complete(record_dict: Dict[str, Any]) -> bool:
+        if record_dict.get("execution_status") != ExecutionStatus.COMPLETED.value:
             return False
-        
-        recorded_hash = entry_dict.get("entry_hash", "")
-        if not recorded_hash:
+            
+        # Verify the self-hash is correct
+        provided_hash = record_dict.get("entry_hash")
+        if not provided_hash:
             return False
+            
+        copy_d = dict(record_dict)
+        del copy_d["entry_hash"]
+        recomputed = hashlib.sha256(_canonical_json(copy_d).encode("utf-8")).hexdigest()
         
-        temp_dict = dict(entry_dict)
-        temp_dict.pop("entry_hash", None)
-        recomputed = hashlib.sha256(_canonical_json(temp_dict).encode("utf-8")).hexdigest()
-        return recomputed == recorded_hash
+        return recomputed == provided_hash
+
+class ReconciliationState(Enum):
+    CONSISTENT = "CONSISTENT"
+    RECOVERABLE = "RECOVERABLE"
+    FATAL_INCONSISTENCY = "FATAL_INCONSISTENCY"
+
+class ReconciliationError(Exception):
+    pass
+
+class LedgerRecoveryReader:
+    @staticmethod
+    def read_ledger(ledger_path: Path) -> Tuple[Dict[str, Dict[str, Any]], ReconciliationState]:
+        completed = {}
+        if not ledger_path.exists():
+            return completed, ReconciliationState.CONSISTENT
+            
+        state = ReconciliationState.CONSISTENT
+        with open(ledger_path, "r", encoding="utf-8") as f:
+            lines = f.readlines()
+            
+        for i, line in enumerate(lines):
+            if not line.strip():
+                continue
+            try:
+                record = json.loads(line)
+            except json.JSONDecodeError:
+                if i == len(lines) - 1:
+                    state = ReconciliationState.RECOVERABLE
+                    continue
+                else:
+                    raise ReconciliationError(f"LEDGER_CORRUPTION: Non-final ledger line is corrupted (line {i+1})")
+                    
+            if record.get("execution_status") == ExecutionStatus.COMPLETED.value:
+                if not LedgerIntegrityValidator.is_resumably_complete(record):
+                    raise ReconciliationError(f"LEDGER_CORRUPTION: Corrupted ledger record detected for entry_id: {record.get('entry_id')}")
+                if record["entry_id"] in completed:
+                    raise ReconciliationError(f"LEDGER_CORRUPTION: Duplicate ledger entry detected for entry_id: {record['entry_id']}")
+                completed[record["entry_id"]] = record
+                
+        return completed, state
 
 
 class CheckpointManager:
     def __init__(self, checkpoints_dir: Path):
         self.checkpoints_dir = checkpoints_dir
         self.checkpoints_dir.mkdir(parents=True, exist_ok=True)
-        
+
     def save(self, checkpoint: ExecutionCheckpoint) -> None:
-        path = self.checkpoints_dir / f"{checkpoint.entry_id}.json"
-        with open(path, "w", encoding="utf-8") as f:
+        final_path = self.checkpoints_dir / f"{checkpoint.entry_id}.json"
+        tmp_path = self.checkpoints_dir / f"{checkpoint.entry_id}.json.tmp"
+        
+        with open(tmp_path, "w", encoding="utf-8") as f:
             json.dump(checkpoint.to_dict(), f, indent=2, sort_keys=True)
+            f.flush()
+            os.fsync(f.fileno())
             
+        os.replace(tmp_path, final_path)
+        
+        if hasattr(os, "O_DIRECTORY"):
+            try:
+                fd = os.open(self.checkpoints_dir, os.O_RDONLY | os.O_DIRECTORY)
+                os.fsync(fd)
+                os.close(fd)
+            except Exception:
+                pass
+
     def load(self, entry_id: str) -> Optional[ExecutionCheckpoint]:
         path = self.checkpoints_dir / f"{entry_id}.json"
         if not path.exists():
             return None
         with open(path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        return ExecutionCheckpoint(**data)
+            return ExecutionCheckpoint(**json.load(f))
+
+class ExecutionReconciler:
+    @staticmethod
+    def reconcile(
+        completed_entries: Dict[str, Dict[str, Any]],
+        checkpoint_manager: CheckpointManager,
+        manifest: ExecutionManifest,
+        attestation: PreflightAttestation
+    ) -> ReconciliationState:
+        for entry_id, ledger_dict in completed_entries.items():
+            condition = ledger_dict.get("condition")
+            if condition in ("COLD_START", "NO_MEMORY"):
+                continue
+                
+            ckpt = checkpoint_manager.load(entry_id)
+            if not ckpt:
+                raise ReconciliationError(f"FATAL_INCONSISTENCY: Missing checkpoint for COMPLETED entry {entry_id}")
+                
+            try:
+                ckpt.validate_integrity(
+                    sealed_manifest_fp=manifest.manifest_fingerprint,
+                    sealed_cohort_fp=manifest.cohort_fingerprint,
+                    sealed_sap_fp=manifest.sap_fingerprint,
+                    execution_commit=attestation.software_commit
+                )
+            except Exception as e:
+                raise ReconciliationError(f"FATAL_INCONSISTENCY: Tampered checkpoint for {entry_id}: {e}")
+                
+            if ckpt.entry_id != ledger_dict["entry_id"]:
+                raise ReconciliationError(f"FATAL_INCONSISTENCY: Checkpoint entry_id mismatch for {entry_id}")
+            if ckpt.sequence_group_id != ledger_dict["sequence_group_id"]:
+                raise ReconciliationError(f"FATAL_INCONSISTENCY: Checkpoint sequence_group_id mismatch for {entry_id}")
+            if ckpt.sequence_position != ledger_dict["sequence_position"]:
+                raise ReconciliationError(f"FATAL_INCONSISTENCY: Checkpoint sequence_position mismatch for {entry_id}")
+                
+        return ReconciliationState.CONSISTENT
 
 
 class DependencyScheduler:
@@ -333,20 +428,8 @@ class BenchmarkExecutionEngine:
         self.executor = TrialExecutor()
 
     def load_completed_entries(self) -> Dict[str, Dict[str, Any]]:
-        completed = {}
-        if not self.ledger_path.exists():
-            return completed
-        with open(self.ledger_path, "r", encoding="utf-8") as f:
-            for line in f:
-                if not line.strip():
-                    continue
-                record = json.loads(line)
-                if record.get("execution_status") == ExecutionStatus.COMPLETED.value:
-                    if not LedgerIntegrityValidator.is_resumably_complete(record):
-                        raise ValueError(f"Corrupted ledger record detected for entry_id: {record.get('entry_id')}")
-                    if record["entry_id"] in completed:
-                        raise ValueError(f"Duplicate ledger entry detected for entry_id: {record['entry_id']}")
-                    completed[record["entry_id"]] = record
+        # Maintained for backwards compatibility in older tests
+        completed, _ = LedgerRecoveryReader.read_ledger(self.ledger_path)
         return completed
 
     def _state_to_serializable(self, state: Dict[str, Any]) -> Dict[str, Any]:
@@ -410,7 +493,15 @@ class BenchmarkExecutionEngine:
         )
         
         ManifestValidator.validate(manifest)
-        completed_entries = self.load_completed_entries()
+        completed_entries, recovery_state = LedgerRecoveryReader.read_ledger(self.ledger_path)
+        
+        if not dry_run:
+            ExecutionReconciler.reconcile(
+                completed_entries,
+                self.checkpoints,
+                manifest,
+                attestation
+            )
         
         groups: Dict[str, List[RunManifestEntry]] = {}
         for e in manifest.entries:
@@ -428,12 +519,6 @@ class BenchmarkExecutionEngine:
                     if not dry_run:
                         ckpt = self.checkpoints.load(e.entry_id)
                         if ckpt:
-                            ckpt.validate_integrity(
-                                manifest.manifest_fingerprint,
-                                manifest.cohort_fingerprint,
-                                manifest.sap_fingerprint,
-                                attestation.software_commit
-                            )
                             current_state = self._serializable_to_state(ckpt.serialized_state)
                             parent_checkpoint_id = e.entry_id
                     continue
@@ -474,10 +559,8 @@ class BenchmarkExecutionEngine:
                     
                 ledger_record, next_state = self.executor.execute(e, current_state)
                 results.append(ledger_record)
-                self.writer.append(ledger_record)
                 
                 if ledger_record.execution_status == ExecutionStatus.COMPLETED.value:
-                    completed_entries[e.entry_id] = ledger_record.to_dict()
                     if e.condition not in (BenchmarkCondition.COLD_START, BenchmarkCondition.NO_MEMORY):
                         current_state = next_state
                         
@@ -501,6 +584,12 @@ class BenchmarkExecutionEngine:
                     else:
                         current_state = None
                         parent_checkpoint_id = None
+                        
+                # Now append to ledger AFTER checkpoint is saved
+                self.writer.append(ledger_record)
+                
+                if ledger_record.execution_status == ExecutionStatus.COMPLETED.value:
+                    completed_entries[e.entry_id] = ledger_record.to_dict()
                 else:
                     continue
 

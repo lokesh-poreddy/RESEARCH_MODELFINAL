@@ -20,7 +20,7 @@ from researchforge.benchmarks.execution.models import (
     RunManifestEntry,
     get_software_commit_info,
 )
-from researchforge.benchmarks.execution.engine import BenchmarkExecutionEngine
+from researchforge.benchmarks.execution.engine import BenchmarkExecutionEngine, ReconciliationError
 from researchforge.benchmarks.cohort.models import BenchmarkCondition, TaskFamily, TransferRegime
 from researchforge.domain.base import _canonical_json, compute_canonical_fingerprint
 
@@ -49,7 +49,7 @@ def create_mock_manifest() -> ExecutionManifest:
         entry_id="task_1",
         sequence_group_id="group_1",
         sequence_position=1,
-        condition=BenchmarkCondition.COLD_START,
+        condition=BenchmarkCondition.CONTINUOUS_EXPERIENCE,
         task_id="XOR_1",
         task_family=TaskFamily.DIGITS_SPATIAL,
         task_fingerprint="fp1",
@@ -102,7 +102,7 @@ def create_mock_attestation(m, preflight_pass=True, software_commit="testcommit1
 def create_valid_ledger_entry(entry_id="task_1", task_id="XOR_1", seq_pos=1):
     payload = {
         "timestamp": "now", "entry_id": entry_id, "sequence_group_id": "group_1", "sequence_position": seq_pos,
-        "condition": "COLD_START", "task_id": task_id, "seed": 42, "ordering": "default",
+        "condition": "CONTINUOUS_EXPERIENCE", "task_id": task_id, "seed": 42, "ordering": "default",
         "execution_status": ExecutionStatus.COMPLETED.value, "outcome_status": "VALID_COMPLETED",
         "best_metric": 0.0, "decision_quality": 0.0, "trials_executed": 0, "wallclock_seconds": 0.0,
         "memory_fingerprint_before": "", "memory_fingerprint_after": ""
@@ -256,7 +256,7 @@ def test_6_dependency_policy(setup_engine, mock_commit):
                 best_metric=0.0, decision_quality=0.0, trials_executed=0, wallclock_seconds=0.0,
                 memory_fingerprint_before="", memory_fingerprint_after="", entry_hash="hash"
             ),
-            None
+            {}
         )
         res = engine.execute(manifest=m, attestation=a, dry_run=False)
     
@@ -295,7 +295,7 @@ def test_9_corrupted_checkpoint(setup_engine, mock_commit):
     le = create_valid_ledger_entry("task_1", "XOR_1", 1)
     engine.writer.append(le)
     
-    with pytest.raises(CheckpointInvalidError):
+    with pytest.raises(ReconciliationError, match="FATAL_INCONSISTENCY: Tampered checkpoint"):
         engine.execute(manifest=m, attestation=a)
 
 
@@ -331,7 +331,7 @@ def test_11_interrupted_run_resumable(setup_engine, mock_commit):
                 best_metric=0.0, decision_quality=0.0, trials_executed=0, wallclock_seconds=0.0,
                 memory_fingerprint_before="", memory_fingerprint_after="", entry_hash="hash"
             ),
-            None
+            {}
         )
         res = engine.execute(manifest=m, attestation=a, dry_run=False)
     
@@ -414,7 +414,7 @@ def test_10_checkpoint_wrong_manifest(setup_engine, mock_commit):
     le = create_valid_ledger_entry("task_1", "XOR_1", 1)
     engine.writer.append(le)
     
-    with pytest.raises(CheckpointInvalidError, match="mismatch"):
+    with pytest.raises(ReconciliationError, match="FATAL_INCONSISTENCY: Tampered checkpoint"):
         engine.execute(manifest=m, attestation=a)
 
 
@@ -432,7 +432,7 @@ def test_13_scientific_failure_execution_failure(setup_engine, mock_commit):
                 best_metric=0.0, decision_quality=0.0, trials_executed=0, wallclock_seconds=0.0,
                 memory_fingerprint_before="", memory_fingerprint_after="", entry_hash="hash"
             ),
-            None
+            {}
         )
         res = engine.execute(manifest=m, attestation=a, dry_run=False)
         
