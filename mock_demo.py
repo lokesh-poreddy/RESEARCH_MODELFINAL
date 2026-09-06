@@ -33,5 +33,5 @@ def mock_make_request(*args, **kwargs):
 if __name__ == "__main__":
     with patch("researchforge.adapters.huggingface.client.HFInferenceClient.infer", side_effect=mock_make_request):
         # We need to set the sys.argv to pass args to run_demo.py
-        sys.argv = ["run_demo.py", "--seeds", "1", "--generations", "2", "--out", "demo_results.json"]
+        sys.argv = ["run_demo.py", "--seeds", "1", "--generations", "2", "--out", "mock_demo_results.json"]
         run_demo.main()

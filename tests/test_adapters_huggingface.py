@@ -129,8 +129,9 @@ class TestConfiguration:
     def test_offline_config_no_token(self):
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("HF_TOKEN", None)
-            cfg = HFClientConfig.from_env()
-            assert cfg.live_mode is False
+            with patch("os.path.exists", return_value=False):
+                cfg = HFClientConfig.from_env()
+                assert cfg.live_mode is False
 
     def test_live_config_with_token(self):
         with patch.dict(os.environ, {"HF_TOKEN": "hf_fakefakefake"}, clear=False):
@@ -454,8 +455,9 @@ class TestControllerIntegration:
         """HF adapter config builds without HF_TOKEN."""
         with patch.dict(os.environ, {}, clear=False):
             os.environ.pop("HF_TOKEN", None)
-            cfg = HFClientConfig.from_env()
-            assert cfg.live_mode is False
+            with patch("os.path.exists", return_value=False):
+                cfg = HFClientConfig.from_env()
+                assert cfg.live_mode is False
             # Adapter modules import cleanly
             from researchforge.adapters.huggingface import (
                 HuggingFaceInferenceProvider,

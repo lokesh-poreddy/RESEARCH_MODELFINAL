@@ -15,11 +15,11 @@ The objective of this phase was to connect the existing Hugging Face adapter inf
 The solution passed offline validation (`pytest -q`) maintaining full offline safety and zero regressions on the RDE-Bench ablation ladder (639 passed, 0 skipped, 0 failed).
 
 ### Live Verification Status
-- **OFFLINE_TEST_VERIFIED**: Yes (639/639 passed)
-- **LIVE_HF_VERIFIED**: LIVE_HF_UNAVAILABLE (The sandbox network prevents live outbound API calls, throwing `urllib3.exceptions.NameResolutionError`.)
-- **END_TO_END_EXECUTED**: No (Due to network unavailability, a live run was not completed.)
-- **MOCK-VERIFIED**: Yes. The integration smoke test (`mock_demo.py`) demonstrated successful invocation of the model generation pipeline and correct parameter mutation of the `TargetModelGenome` using the `LLMSynthesizer`.
-- **SCIENTIFIC_EFFICACY_ESTABLISHED**: Pending real environment deployment.
+- **OFFLINE_TEST_VERIFIED**: true (639/639 passed, 0 skipped, 0 failed, 0 errors)
+- **HF_MOCK_INTEGRATION_VERIFIED**: true (Integration smoke test `mock_demo.py` generated `demo_results.json` natively)
+- **LIVE_HF_VERIFIED**: false (Environment restriction prevented live outbound API call, properly caught as `LIVE_HF_UNAVAILABLE`)
+- **END_TO_END_EXECUTED**: false (Requires unrestricted outbound environment)
+- **SCIENTIFIC_EFFICACY_ESTABLISHED**: false (Pending empirical execution)
 
 ### Execution Evidence
 - **Provider Used:** HuggingFaceInferenceProvider
