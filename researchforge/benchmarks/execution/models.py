@@ -577,3 +577,79 @@ class ExecutionCheckpoint:
             "serialized_state": self.serialized_state,
             "created_at": self.created_at,
         }
+
+@dataclass(frozen=True)
+class CompletionAttestation:
+    """Cryptographically sealed artifact proving benchmark completion and integrity."""
+    attestation_fingerprint: str
+    manifest_fingerprint: str
+    cohort_fingerprint: str
+    sap_fingerprint: str
+    preflight_attestation_fingerprint: str
+    software_commit: Dict[str, Any]
+    
+    physical_ledger_fingerprint: str
+    logical_ledger_fingerprint: str
+    
+    expected_trials: int
+    observed_unique_trials: int
+    missing: int
+    duplicates: int
+    unexpected: int
+    non_completed: int
+    causal_violations: int
+    invalid_records: int
+    artifact_gaps: int
+    
+    ledger_integrity_passed: bool
+    execution_complete: bool
+    
+    missing_entries: List[str]
+    duplicate_entries: List[str]
+    unexpected_entries: List[str]
+    non_completed_entries: List[str]
+    causal_violation_entries: List[str]
+    invalid_entries: List[str]
+    artifact_gap_entries: List[str]
+    
+    timestamp: str
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "attestation_fingerprint": self.attestation_fingerprint,
+            "manifest_fingerprint": self.manifest_fingerprint,
+            "cohort_fingerprint": self.cohort_fingerprint,
+            "sap_fingerprint": self.sap_fingerprint,
+            "preflight_attestation_fingerprint": self.preflight_attestation_fingerprint,
+            "software_commit": self.software_commit,
+            
+            "physical_ledger_fingerprint": self.physical_ledger_fingerprint,
+            "logical_ledger_fingerprint": self.logical_ledger_fingerprint,
+            
+            "expected_trials": self.expected_trials,
+            "observed_unique_trials": self.observed_unique_trials,
+            "missing": self.missing,
+            "duplicates": self.duplicates,
+            "unexpected": self.unexpected,
+            "non_completed": self.non_completed,
+            "causal_violations": self.causal_violations,
+            "invalid_records": self.invalid_records,
+            "artifact_gaps": self.artifact_gaps,
+            
+            "ledger_integrity_passed": self.ledger_integrity_passed,
+            "execution_complete": self.execution_complete,
+            
+            "missing_entries": self.missing_entries,
+            "duplicate_entries": self.duplicate_entries,
+            "unexpected_entries": self.unexpected_entries,
+            "non_completed_entries": self.non_completed_entries,
+            "causal_violation_entries": self.causal_violation_entries,
+            "invalid_entries": self.invalid_entries,
+            "artifact_gap_entries": self.artifact_gap_entries,
+            
+            "timestamp": self.timestamp,
+        }
+
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "CompletionAttestation":
+        return cls(**data)
