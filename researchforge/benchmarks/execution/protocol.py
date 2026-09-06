@@ -43,9 +43,11 @@ from .models import (
     PreflightGateError,
     PreflightValidationReport,
     RunManifestEntry,
+    RunManifestEntry,
     get_software_commit_info,
 )
 from .preflight import PreflightValidator
+from .engine import BenchmarkExecutionEngine
 
 
 class BenchmarkExecutionProtocol:
@@ -275,103 +277,6 @@ class BenchmarkExecutionProtocol:
         return record
 
     # ── Single Task Evaluation ──────────────────────────────────────────────────
-    def execute_task_entry(
-        self,
-        entry: RunManifestEntry,
-        inherited_state: Optional[Dict[str, Any]] = None,
-    ) -> Tuple[LedgerEntry, Dict[str, Any]]:
-        """Executes a single task entry under strict manifest parameters and returns ledger record + new state."""
-        t_start = time.time()
-
-        m_task = materialize_benchmark_task(entry.task_id, seed=entry.seed)
-
-        cond = entry.condition
-        if cond == BenchmarkCondition.COLD_START:
-            ctrl = ResearchController(
-                m_task.task,
-                condition="cold_start",
-                seed=entry.seed,
-                population_size=entry.population_size,
-            )
-        elif cond == BenchmarkCondition.NO_MEMORY:
-            ctrl = ResearchController(
-                m_task.task,
-                condition="no_memory",
-                seed=entry.seed,
-                population_size=entry.population_size,
-            )
-        else:
-            state = inherited_state or {}
-            ctrl = ResearchController(
-                m_task.task,
-                condition=cond.value.lower(),
-                seed=entry.seed,
-                population_size=entry.population_size,
-                ecrm=state.get("ecrm"),
-                trajectory_memory=state.get("trajectory_memory"),
-                adaptive_trajectory_memory=state.get("adaptive_trajectory_memory"),
-                policy_learner=state.get("policy_learner"),
-                failed_signatures=state.get("failed_signatures") or set(),
-            )
-
-        mem_before_fp = ctrl.export_memory_fingerprint()
-        run_res = ctrl.run(n_generations=entry.generation_budget)
-        mem_after_fp = ctrl.export_memory_fingerprint()
-        wallclock = time.time() - t_start
-
-        fails = inherited_state.get("failed_signatures", set()) if inherited_state else set()
-        dq = self.evaluator.calculate_decision_quality(run_res.trials, fails)
-        status = RunOutcomeCategory.VALID_COMPLETED.value if run_res.best_metric > 0.0 else RunOutcomeCategory.SCIENTIFIC_FAILURE.value
-
-        payload = {
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "entry_id": entry.entry_id,
-            "sequence_group_id": entry.sequence_group_id,
-            "sequence_position": entry.sequence_position,
-            "condition": entry.condition.value,
-            "task_id": entry.task_id,
-            "seed": entry.seed,
-            "ordering": entry.ordering,
-            "status": status,
-            "best_metric": run_res.best_metric,
-            "decision_quality": dq,
-            "trials_executed": len(run_res.trials),
-            "wallclock_seconds": wallclock,
-            "memory_fingerprint_before": mem_before_fp,
-            "memory_fingerprint_after": mem_after_fp,
-        }
-        entry_hash = hashlib.sha256(_canonical_json(payload).encode("utf-8")).hexdigest()
-
-        ledger_entry = LedgerEntry(
-            timestamp=payload["timestamp"],
-            entry_id=entry.entry_id,
-            sequence_group_id=entry.sequence_group_id,
-            sequence_position=entry.sequence_position,
-            condition=entry.condition.value,
-            task_id=entry.task_id,
-            seed=entry.seed,
-            ordering=entry.ordering,
-            status=status,
-            best_metric=run_res.best_metric,
-            decision_quality=dq,
-            trials_executed=len(run_res.trials),
-            wallclock_seconds=wallclock,
-            memory_fingerprint_before=mem_before_fp,
-            memory_fingerprint_after=mem_after_fp,
-            entry_hash=entry_hash,
-        )
-
-        next_state = {
-            "ecrm": ctrl.ecrm,
-            "trajectory_memory": ctrl.trajectory_memory,
-            "adaptive_trajectory_memory": ctrl.adaptive_trajectory_memory,
-            "policy_learner": ctrl.policy_learner,
-            "failed_signatures": set(ctrl._failed_signatures),
-            "memory_fingerprint": mem_after_fp,
-        }
-
-        return ledger_entry, next_state
-
     # ── Benchmark Execution Runner (Safety Gated) ───────────────────────────────
     def execute_benchmark(
         self,
@@ -379,40 +284,35 @@ class BenchmarkExecutionProtocol:
         attestation: PreflightAttestation,
         manifest_file_path: Optional[Path | str] = None,
         cohort_file_path: Optional[Path | str] = None,
+        sap_file_path: Optional[Path | str] = None,
         report_file_path: Optional[Path | str] = None,
         report: Optional[PreflightValidationReport] = None,
+        checkpoints_dir: Optional[Path | str] = None,
+        dry_run: bool = False
     ) -> List[LedgerEntry]:
         """Executes the full benchmark catalog.
         
         MANDATORY INVARIANT:
-        This method will immediately raise ExecutionNotAuthorizedError unless
-        the entire cryptographic chain matches AND attestation.execution_authorized
-        is explicitly True!
+        This method delegates to BenchmarkExecutionEngine, which will immediately 
+        raise ExecutionNotAuthorizedError unless the entire cryptographic chain matches 
+        AND attestation.execution_authorized is explicitly True!
         """
-        self.verify_authorization(
+        # Ensure we have paths
+        ledger_p = self.ledger_path or Path("ledger.jsonl")
+        registry_p = self.registry_path or Path("registry.json")
+        check_p = Path(checkpoints_dir) if checkpoints_dir else ledger_p.parent / ".checkpoints"
+        
+        engine = BenchmarkExecutionEngine(
+            ledger_path=ledger_p,
+            registry_path=registry_p,
+            checkpoints_dir=check_p
+        )
+        
+        return engine.execute(
             manifest=manifest,
             attestation=attestation,
             manifest_file_path=manifest_file_path,
             cohort_file_path=cohort_file_path,
-            report_file_path=report_file_path,
-            report=report,
+            sap_file_path=sap_file_path,
+            dry_run=dry_run
         )
-
-        results: List[LedgerEntry] = []
-        groups: Dict[str, List[RunManifestEntry]] = {}
-        for e in manifest.entries:
-            groups.setdefault(e.sequence_group_id, []).append(e)
-
-        for gid, entries in groups.items():
-            entries.sort(key=lambda x: x.sequence_position)
-            current_state: Optional[Dict[str, Any]] = None
-            for e in entries:
-                ledger_record, next_state = self.execute_task_entry(e, current_state)
-                results.append(ledger_record)
-                self.append_ledger_entry(ledger_record)
-                if e.condition not in (BenchmarkCondition.COLD_START, BenchmarkCondition.NO_MEMORY):
-                    current_state = next_state
-                else:
-                    current_state = None
-
-        return results

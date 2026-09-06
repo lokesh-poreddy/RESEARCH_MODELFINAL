@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+from enum import Enum
 
 from ...domain.base import (
     _canonical_json,
@@ -99,6 +100,31 @@ class ExecutionNotAuthorizedError(Exception):
     pass
 
 
+class CheckpointInvalidError(Exception):
+    """Raised when an ExecutionCheckpoint fails validation against sealed artifacts or state fingerprint."""
+    pass
+
+
+class ManifestInvalidError(Exception):
+    """Raised when the ExecutionManifest contains DAG cycles, duplicate entries, or invalid dependencies."""
+    pass
+
+
+class ExecutionStatus(str, Enum):
+    PENDING = "PENDING"
+    RUNNING = "RUNNING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"
+    BLOCKED = "BLOCKED"
+    SKIPPED = "SKIPPED"
+
+
+class DependencyPolicy(str, Enum):
+    EXECUTION_COMPLETE = "EXECUTION_COMPLETE"
+    SCIENTIFICALLY_VALID = "SCIENTIFICALLY_VALID"
+    ARTIFACT_AVAILABLE = "ARTIFACT_AVAILABLE"
+
+
 @dataclass(frozen=True)
 class RunManifestEntry:
     """Immutable execution contract for a single task evaluation inside a sequence group."""
@@ -116,6 +142,7 @@ class RunManifestEntry:
     sequence_transfer_regime: TransferRegime
     condition_effective_regime: TransferRegime
     depends_on_entry_ids: Tuple[str, ...]
+    dependency_policy: DependencyPolicy = DependencyPolicy.EXECUTION_COMPLETE
     generation_budget: int = 10
     population_size: int = 6
     timeout_seconds: float = 30.0
@@ -143,6 +170,7 @@ class RunManifestEntry:
             "sequence_transfer_regime": self.sequence_transfer_regime.value,
             "condition_effective_regime": self.condition_effective_regime.value,
             "depends_on_entry_ids": list(self.depends_on_entry_ids),
+            "dependency_policy": self.dependency_policy.value,
             "generation_budget": self.generation_budget,
             "population_size": self.population_size,
             "timeout_seconds": self.timeout_seconds,
@@ -464,7 +492,8 @@ class LedgerEntry:
     task_id: str
     seed: int
     ordering: str
-    status: str
+    execution_status: str
+    outcome_status: str
     best_metric: float
     decision_quality: float
     trials_executed: int
@@ -483,7 +512,8 @@ class LedgerEntry:
             "task_id": self.task_id,
             "seed": self.seed,
             "ordering": self.ordering,
-            "status": self.status,
+            "execution_status": self.execution_status,
+            "outcome_status": self.outcome_status,
             "best_metric": self.best_metric,
             "decision_quality": self.decision_quality,
             "trials_executed": self.trials_executed,
@@ -491,4 +521,59 @@ class LedgerEntry:
             "memory_fingerprint_before": self.memory_fingerprint_before,
             "memory_fingerprint_after": self.memory_fingerprint_after,
             "entry_hash": self.entry_hash,
+        }
+
+
+@dataclass(frozen=True)
+class ExecutionCheckpoint:
+    """Canonical, self-validating state checkpoint for resumption without opaque pickling."""
+    entry_id: str
+    sequence_group_id: str
+    sequence_position: int
+    manifest_fingerprint: str
+    cohort_fingerprint: str
+    sap_fingerprint: str
+    software_commit: str
+    state_fingerprint: str
+    parent_checkpoint_id: Optional[str]
+    state_schema_version: str
+    serialized_state: Dict[str, Any]
+    created_at: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
+
+    def validate_integrity(
+        self,
+        sealed_manifest_fp: str,
+        sealed_cohort_fp: str,
+        sealed_sap_fp: str,
+        execution_commit: str
+    ) -> None:
+        """Validates that this checkpoint belongs to the exact sealed artifacts."""
+        if self.manifest_fingerprint != sealed_manifest_fp:
+            raise CheckpointInvalidError("Checkpoint manifest fingerprint mismatch.")
+        if self.cohort_fingerprint != sealed_cohort_fp:
+            raise CheckpointInvalidError("Checkpoint cohort fingerprint mismatch.")
+        if self.sap_fingerprint != sealed_sap_fp:
+            raise CheckpointInvalidError("Checkpoint SAP fingerprint mismatch.")
+        if self.software_commit != execution_commit:
+            raise CheckpointInvalidError("Checkpoint software commit mismatch.")
+        
+        # Verify state fingerprint
+        recomputed = compute_canonical_fingerprint(self.serialized_state)
+        if self.state_fingerprint != recomputed:
+            raise CheckpointInvalidError(f"Checkpoint state fingerprint mismatch: {self.state_fingerprint} != {recomputed}")
+
+    def to_dict(self) -> Dict[str, Any]:
+        return {
+            "entry_id": self.entry_id,
+            "sequence_group_id": self.sequence_group_id,
+            "sequence_position": self.sequence_position,
+            "manifest_fingerprint": self.manifest_fingerprint,
+            "cohort_fingerprint": self.cohort_fingerprint,
+            "sap_fingerprint": self.sap_fingerprint,
+            "software_commit": self.software_commit,
+            "state_fingerprint": self.state_fingerprint,
+            "parent_checkpoint_id": self.parent_checkpoint_id,
+            "state_schema_version": self.state_schema_version,
+            "serialized_state": self.serialized_state,
+            "created_at": self.created_at,
         }
