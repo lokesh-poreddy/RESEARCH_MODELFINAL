@@ -170,6 +170,15 @@ def random_perturbation(genome: ModelGenome, rng: random.Random) -> ModelGenome:
     return g
 
 
+# Global registry for dynamically compiled DSL operators
+DYNAMIC_STRATEGIES = {}
+
+def register_dynamic_strategy(name: str, func: Any) -> None:
+    """Registers a new algorithm discovered by MetaController."""
+    DYNAMIC_STRATEGIES[name] = func
+    if name not in STRATEGIES:
+        STRATEGIES.append(name)
+
 def apply_strategy(strategy: str, genome: Any, rng: random.Random,
                     population: Optional[List[Any]] = None) -> Any:
     """Strategy name -> concrete genome edit. Works with ModelGenome and TargetModelGenome."""
@@ -178,7 +187,9 @@ def apply_strategy(strategy: str, genome: Any, rng: random.Random,
     g = genome.to_model_genome() if is_tmg else genome
     pop = [p.to_model_genome() if isinstance(p, TargetModelGenome) else p for p in population] if population else None
 
-    if strategy == "increase_capacity":
+    if strategy in DYNAMIC_STRATEGIES:
+        res = DYNAMIC_STRATEGIES[strategy](g)
+    elif strategy == "increase_capacity":
         res = increase_capacity(g, rng)
     elif strategy == "add_regularization":
         res = add_regularization(g, rng)

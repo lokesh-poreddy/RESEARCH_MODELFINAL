@@ -174,6 +174,14 @@ class ContextualBanditPolicy:
             self._b[a] = np.zeros(self.d)
             self._n_updates[a] = 0
 
+    def add_action(self, action: str) -> None:
+        """Dynamically adds a newly discovered action to the bandit."""
+        if action not in self.actions:
+            self.actions.append(action)
+            self._A[action] = np.eye(self.d)
+            self._b[action] = np.zeros(self.d)
+            self._n_updates[action] = 0
+
     def select_action(
         self,
         context: ContextVector,
