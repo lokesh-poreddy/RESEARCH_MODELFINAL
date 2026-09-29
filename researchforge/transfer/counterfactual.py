@@ -1,114 +1,96 @@
-"""researchforge/transfer/counterfactual.py — Tri-state counterfactual arbitration.
+"""researchforge/transfer/counterfactual.py — Counterfactual Evidence Service.
 
-Phase 13 (RF-1.0.0-beta.1):
-Explicitly models COUNTERFACTUAL_OBSERVED, COUNTERFACTUAL_ESTIMATED, and
-COUNTERFACTUAL_UNAVAILABLE. When unavailable, the system never fabricates
-expectations; it falls back to TransferGuard's evidence-based policy.
+Phase 12A:
+Provides epistemic evidence (OBSERVED, ESTIMATED, UNAVAILABLE) about transfer utility.
+This service does NOT make operational transfer decisions. It purely supplies the
+measured or predicted counterfactual $\\Delta$ to the downstream Utility Learner.
 """
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, Optional, Tuple
 
 
 class CounterfactualStatus(str, Enum):
     """Epistemic status of a counterfactual quality evaluation."""
-    COUNTERFACTUAL_OBSERVED = "COUNTERFACTUAL_OBSERVED"      # Both prior and fresh paths empirically evaluated
-    COUNTERFACTUAL_ESTIMATED = "COUNTERFACTUAL_ESTIMATED"    # Validated surrogate model prediction with variance
-    COUNTERFACTUAL_UNAVAILABLE = "COUNTERFACTUAL_UNAVAILABLE" # No paired runs or surrogate model; cannot fabricate
+    OBSERVED = "OBSERVED"      # Both prior and fresh paths empirically evaluated
+    ESTIMATED = "ESTIMATED"    # Validated surrogate model prediction with variance
+    UNAVAILABLE = "UNAVAILABLE" # No paired runs or surrogate model; cannot fabricate
 
 
 @dataclass(frozen=True)
-class CounterfactualEvaluation:
-    """Diagnostic outcome of counterfactual analysis for a candidate decision."""
+class TransferEvidence:
+    """Epistemic evidence of counterfactual analysis for a candidate transfer."""
     status: CounterfactualStatus
     expected_delta: Optional[float]
     variance: Optional[float]
     confidence_interval: Optional[Tuple[float, float]]
-    recommendation: str  # "PROCEED_WITH_TRANSFER" | "SUPPRESS_TRANSFER" | "FALLBACK_TO_EVIDENCE_GATING"
     rationale: str
     metadata: Dict[str, Any] = field(default_factory=dict)
 
 
-class CounterfactualArbitrator:
-    """Evaluates whether transferring prior memory is expected to improve decision quality."""
+class CounterfactualEvidenceService:
+    """Provides evidence about the utility of a transfer decision without gating it."""
 
     def __init__(
         self,
-        surrogate_model: Optional[Callable[[Dict[str, Any]], Tuple[float, float]]] = None,
+        utility_predictor: Optional[Callable[[Dict[str, Any]], Tuple[float, float]]] = None,
     ) -> None:
-        self.surrogate_model = surrogate_model
+        # The predictor should ideally be the Phase 12B Transfer Utility Learner.
+        self.utility_predictor = utility_predictor
 
-    def arbitrate(
+    def get_evidence(
         self,
-        candidate_spec: Dict[str, Any],
+        context_features: Dict[str, Any],
         paired_evidence: Optional[Dict[str, float]] = None,
-    ) -> CounterfactualEvaluation:
-        """Arbitrate decision based on counterfactual evidence.
+    ) -> TransferEvidence:
+        """Fetch counterfactual evidence for a transfer given the context.
         
         Args:
-            candidate_spec: Specification of the candidate genome/action.
-            paired_evidence: Optional dict with 'quality_prior' and 'quality_fresh' if paired run occurred.
+            context_features: The full Phase 12 context vector (Cs, Ct, Cst, M, a).
+            paired_evidence: Optional dict with 'quality_prior' and 'quality_fresh'.
         """
-        # 1. Case: COUNTERFACTUAL_OBSERVED
+        # 1. Case: OBSERVED (We actually ran a paired counterfactual experiment)
         if paired_evidence and "quality_prior" in paired_evidence and "quality_fresh" in paired_evidence:
             q_prior = paired_evidence["quality_prior"]
             q_fresh = paired_evidence["quality_fresh"]
             obs_delta = q_prior - q_fresh
-            rec = "PROCEED_WITH_TRANSFER" if obs_delta >= 0 else "SUPPRESS_TRANSFER"
-            rat = (
-                f"Observed paired execution: Q(prior)={q_prior:.4f}, Q(fresh)={q_fresh:.4f}, "
-                f"Delta={obs_delta:+.4f}."
-            )
-            return CounterfactualEvaluation(
-                status=CounterfactualStatus.COUNTERFACTUAL_OBSERVED,
+            return TransferEvidence(
+                status=CounterfactualStatus.OBSERVED,
                 expected_delta=obs_delta,
                 variance=0.0,
                 confidence_interval=(obs_delta, obs_delta),
-                recommendation=rec,
-                rationale=rat,
+                rationale=f"Observed paired execution: Q(prior)={q_prior:.4f}, Q(fresh)={q_fresh:.4f}, Delta={obs_delta:+.4f}.",
             )
 
-        # 2. Case: COUNTERFACTUAL_ESTIMATED (Surrogate prediction)
-        if self.surrogate_model is not None:
+        # 2. Case: ESTIMATED (Predictor supplies E[Delta] and Var[Delta])
+        if self.utility_predictor is not None:
             try:
-                pred_mean, pred_var = self.surrogate_model(candidate_spec)
+                pred_mean, pred_var = self.utility_predictor(context_features)
                 ci_half = 1.96 * (pred_var ** 0.5)
                 ci = (pred_mean - ci_half, pred_mean + ci_half)
-                rec = "PROCEED_WITH_TRANSFER" if pred_mean >= 0 else "SUPPRESS_TRANSFER"
-                rat = (
-                    f"Estimated by surrogate model: E[Delta]={pred_mean:+.4f}, "
-                    f"Var={pred_var:.4f}, 95% CI=[{ci[0]:+.4f}, {ci[1]:+.4f}]."
-                )
-                return CounterfactualEvaluation(
-                    status=CounterfactualStatus.COUNTERFACTUAL_ESTIMATED,
+                return TransferEvidence(
+                    status=CounterfactualStatus.ESTIMATED,
                     expected_delta=pred_mean,
                     variance=pred_var,
                     confidence_interval=ci,
-                    recommendation=rec,
-                    rationale=rat,
+                    rationale=f"Estimated by utility predictor: E[Delta]={pred_mean:+.4f}, Var={pred_var:.4f}.",
                 )
             except Exception as e:
-                # Surrogate failure falls back to unavailable
-                return CounterfactualEvaluation(
-                    status=CounterfactualStatus.COUNTERFACTUAL_UNAVAILABLE,
+                return TransferEvidence(
+                    status=CounterfactualStatus.UNAVAILABLE,
                     expected_delta=None,
                     variance=None,
                     confidence_interval=None,
-                    recommendation="FALLBACK_TO_EVIDENCE_GATING",
-                    rationale=f"Surrogate model estimation failed: {e}. Falling back to evidence gating.",
+                    rationale=f"Utility predictor failed: {e}.",
                 )
 
-        # 3. Case: COUNTERFACTUAL_UNAVAILABLE
-        return CounterfactualEvaluation(
-            status=CounterfactualStatus.COUNTERFACTUAL_UNAVAILABLE,
+        # 3. Case: UNAVAILABLE
+        return TransferEvidence(
+            status=CounterfactualStatus.UNAVAILABLE,
             expected_delta=None,
             variance=None,
             confidence_interval=None,
-            recommendation="FALLBACK_TO_EVIDENCE_GATING",
-            rationale=(
-                "No paired observation and no surrogate model available. "
-                "Counterfactual expectation cannot be known; falling back cleanly to TransferGuard evidence gating."
-            ),
+            rationale="No paired observation and no utility predictor available.",
         )

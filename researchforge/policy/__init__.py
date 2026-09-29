@@ -9,6 +9,7 @@ from .portfolio import BranchState, PortfolioBranch, ResearchPortfolio
 from .saturation import PivotRecommendation, ResearchSaturationDetector, SaturationReport, SaturationState
 from .telemetry import ResearchOutcomeObservation, ResearchProgressStatus
 from .policy_learner import PolicyLearner  # legacy compatibility
+from .utility_gate import GateAction, UtilityGateDecision, UtilityAwareGate
 
 __all__ = [
     "PolicyConfig",
@@ -34,4 +35,7 @@ __all__ = [
     "ResearchOutcomeObservation",
     "ResearchProgressStatus",
     "PolicyLearner",
+    "GateAction",
+    "UtilityGateDecision",
+    "UtilityAwareGate",
 ]

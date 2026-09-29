@@ -18,7 +18,7 @@ like).
 """
 from __future__ import annotations
 import random
-from typing import List, Protocol
+from typing import List, Protocol, Optional, Any
 
 from ..genome.model_genome import ModelGenome, GENOME_SCHEMA
 from ..genome.operators import apply_strategy
@@ -26,14 +26,16 @@ from ..genome.operators import apply_strategy
 
 class Synthesizer(Protocol):
     def synthesize(self, strategy: str, base: ModelGenome, rng: random.Random,
-                    population: List[ModelGenome]) -> ModelGenome: ...
+                    population: List[ModelGenome],
+                    memory_context: Optional[Any] = None) -> ModelGenome: ...
 
 
 class HeuristicSynthesizer:
     """Deterministic strategy -> genome-operator mapping. No network, no LLM."""
 
     def synthesize(self, strategy: str, base: ModelGenome, rng: random.Random,
-                    population: List[ModelGenome]) -> ModelGenome:
+                    population: List[ModelGenome],
+                    memory_context: Optional[Any] = None) -> ModelGenome:
         return apply_strategy(strategy, base, rng, population=population)
 
 
@@ -48,7 +50,8 @@ class LLMSynthesizer:
         self.provider = provider
 
     def synthesize(self, strategy: str, base: ModelGenome, rng: random.Random,
-                    population: List[ModelGenome]) -> ModelGenome:
+                    population: List[ModelGenome],
+                    memory_context: Optional[Any] = None) -> ModelGenome:
         import json
         import re
 
@@ -57,6 +60,8 @@ Your task is to mutate the given base model genome according to the provided str
 
 Strategy: {strategy}
 Base Genome: {base.to_json()}
+Prior Memory Context: {memory_context if memory_context else 'None'}
+
 
 You must output a structured mutation intent as a JSON object matching this schema:
 {{

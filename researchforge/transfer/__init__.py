@@ -19,9 +19,11 @@ from .affinity import (
 from .guard import TransferGuard
 from .counterfactual import (
     CounterfactualStatus,
-    CounterfactualEvaluation,
-    CounterfactualArbitrator,
+    TransferEvidence,
+    CounterfactualEvidenceService,
 )
+from .utility_learner import TransferUtilityPredictor
+from .sampling import CounterfactualSamplingPolicy
 
 __all__ = [
     "TransferableKnowledgeCategory",
@@ -35,6 +37,8 @@ __all__ = [
     "compute_transfer_score",
     "TransferGuard",
     "CounterfactualStatus",
-    "CounterfactualEvaluation",
-    "CounterfactualArbitrator",
+    "TransferEvidence",
+    "CounterfactualEvidenceService",
+    "TransferUtilityPredictor",
+    "CounterfactualSamplingPolicy",
 ]
