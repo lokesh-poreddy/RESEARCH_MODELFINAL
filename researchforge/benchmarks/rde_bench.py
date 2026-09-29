@@ -106,7 +106,7 @@ def run_rde_bench(tasks: List[Task], seeds: List[int] = (0, 1, 2),
         for cond in CONDITIONS:
             report[task.name][cond] = run_condition(task, cond, list(seeds), n_generations)
         nomem = report[task.name]["no_memory"]
-        for memory_cond in ("full", "trajectory_memory", "adaptive_trajectory"):
+        for memory_cond in ("full", "trajectory_memory", "adaptive_trajectory", "contextual_policy"):
             if memory_cond in report[task.name]:
                 report[task.name][memory_cond].memory_utility = (
                     report[task.name][memory_cond].best_metric_mean - nomem.best_metric_mean)
@@ -117,11 +117,11 @@ def print_report(report: Dict[str, Dict[str, BenchSummary]]) -> None:
     for task_name, conds in report.items():
         print(f"\n=== RDE-Bench: {task_name} ===")
         print(f"{'condition':<20}{'best':>8}{'RE':>8}{'SE':>6}{'FRR':>7}{'NTR':>7}{'MU':>9}")
-        for cond_name in ("full", "trajectory_memory", "adaptive_trajectory", "no_memory", "random"):
+        for cond_name in ("contextual_policy", "full", "trajectory_memory", "adaptive_trajectory", "no_memory", "random"):
             if cond_name not in conds:
                 continue
             s = conds[cond_name]
-            mu = f"{s.memory_utility:+.4f}" if cond_name in ("full", "trajectory_memory", "adaptive_trajectory") else "--"
+            mu = f"{s.memory_utility:+.4f}" if cond_name in ("full", "trajectory_memory", "adaptive_trajectory", "contextual_policy") else "--"
             print(f"{cond_name:<20}{s.best_metric_mean:>8.4f}{s.research_efficiency:>8.4f}"
                   f"{s.search_efficiency:>6d}{s.failure_repetition_rate:>7.2f}"
                   f"{s.negative_transfer_rate:>7.2f}{mu:>9}")

@@ -232,6 +232,101 @@ def tabular_xor_parity_task(seed: int = 0) -> ContinuityTask:
     )
 
 
+# ── 4. Transfer Matrix Specific Tasks ──────────────────────────────────────────
+
+def digits_shifted_task(seed: int = 0, n_train: int = 60) -> ContinuityTask:
+    """High-overlap transfer candidate: digits with intensity/spatial perturbation."""
+    from sklearn.datasets import load_digits
+    import scipy.ndimage
+    data = load_digits()
+    X_orig, y = data.data, data.target
+    
+    rng = np.random.RandomState(seed + 101)
+    X_shifted = np.zeros_like(X_orig)
+    
+    # Apply intensity variation, Gaussian noise, and mild spatial shift
+    for i in range(len(X_orig)):
+        img = X_orig[i].reshape(8, 8)
+        
+        # 1. Spatial displacement (mild)
+        shift_r, shift_c = rng.uniform(-0.8, 0.8, size=2)
+        img_shifted = scipy.ndimage.shift(img, [shift_r, shift_c], mode='nearest')
+        
+        # 2. Intensity variation
+        scale = rng.uniform(0.7, 1.2)
+        img_shifted = img_shifted * scale
+        
+        # 3. Gaussian perturbation
+        img_shifted += rng.normal(0, 1.5, size=(8, 8))
+        
+        X_shifted[i] = np.clip(img_shifted.flatten(), 0, 16)
+
+    X_train, X_rest, y_train, y_rest = train_test_split(
+        X_shifted, y, train_size=n_train, random_state=seed, stratify=y
+    )
+    X_val, X_test, y_val, y_test = train_test_split(
+        X_rest, y_rest, test_size=0.5, random_state=seed, stratify=y_rest
+    )
+
+    t = Task(
+        name="digits_shifted",
+        description=f"10-class digit classification with spatial/intensity perturbations ({n_train} training samples)",
+        X_train=X_train, y_train=y_train,
+        X_val=X_val, y_val=y_val,
+        X_test=X_test, y_test=y_test,
+        metric_fn=accuracy_score,
+        target_metric=0.85,
+    )
+    return ContinuityTask(
+        task_id="T_digits_shifted",
+        name="Digits (Shifted)",
+        regime=TaskRegime.SAME_FAMILY,
+        family="digits_vision_shifted",
+        task=t,
+        description="Perturbed load_digits for high-overlap transfer testing",
+    )
+
+
+def capacity_trap_task(seed: int = 0) -> ContinuityTask:
+    """Negative-transfer candidate: designed to severely punish over-capacity."""
+    from sklearn.datasets import make_classification
+    
+    # High-dimensional, low-sample, noisy, redundant
+    X, y = make_classification(
+        n_samples=600,
+        n_features=96,
+        n_informative=5,
+        n_redundant=40,
+        n_repeated=5,
+        n_classes=2,
+        flip_y=0.15,          # 15% label noise
+        class_sep=0.5,        # highly overlapping classes
+        random_state=seed + 202
+    )
+    
+    # Very small training set (60 samples) vs high features (96)
+    X_train, X_rest, y_train, y_rest = train_test_split(X, y, train_size=60, random_state=seed, stratify=y)
+    X_val, X_test, y_val, y_test = train_test_split(X_rest, y_rest, test_size=0.5, random_state=seed, stratify=y_rest)
+
+    t = Task(
+        name="capacity_trap",
+        description="Noisy tabular dataset where adding model capacity degrades validation",
+        X_train=X_train, y_train=y_train,
+        X_val=X_val, y_val=y_val,
+        X_test=X_test, y_test=y_test,
+        metric_fn=accuracy_score,
+        target_metric=0.70,
+    )
+    return ContinuityTask(
+        task_id="T_capacity_trap",
+        name="Capacity Trap",
+        regime=TaskRegime.UNRELATED,
+        family="noisy_tabular",
+        task=t,
+        description="Controlled negative-transfer candidate",
+    )
+
+
 # ── Task Suites & Orderings ───────────────────────────────────────────────────
 
 def get_pilot_task_sequence(seed: int = 0) -> List[ContinuityTask]:
@@ -252,6 +347,8 @@ def get_full_task_sequence(seed: int = 0) -> List[ContinuityTask]:
         synthetic_ecg_lead1_task(seed=seed),
         synthetic_ecg_lead2_task(seed=seed),
         tabular_xor_parity_task(seed=seed),
+        digits_shifted_task(seed=seed),
+        capacity_trap_task(seed=seed),
     ]
 
 

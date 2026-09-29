@@ -226,7 +226,7 @@ class ResearchController:
             from ..transfer.sampling import CounterfactualSamplingPolicy
             from ..policy.utility_gate import UtilityAwareGate
 
-            self._utility_predictor = TransferUtilityPredictor(feature_dim=5)
+            self._utility_predictor = TransferUtilityPredictor(feature_dim=9)
             self._evidence_service = CounterfactualEvidenceService(utility_predictor=self._utility_predictor.get_predictor_callable())
             self._sampling_policy = CounterfactualSamplingPolicy()
             self._utility_gate = UtilityAwareGate()
@@ -394,12 +394,60 @@ class ResearchController:
             failure_rate=failure_rate,
         )
 
-    def _build_phase12_context(self, action: str, parent: TargetModelGenome) -> Dict[str, Any]:
-        """RF-2.0 Phase 12: Build context specifically for the Utility Predictor."""
+    def _build_phase12_context(self, action: str, parent: TargetModelGenome, best_metric: float=0.0, gen: int=0, n_generations: int=25) -> Dict[str, Any]:
+        """RF-2.0 Phase 12: Build the canonical 9-part context for the Utility Predictor."""
+        
+        # Pull Memory Evidence (if available)
+        mem_mean = 0.0
+        mem_var = 1.0
+        mem_obs = 0
+        source_family = "unknown"
+        if self._posterior_memory:
+            parent_mg = parent.to_model_genome()
+            from ..memory.trajectory import capacity_bucket
+            pq = self._posterior_memory.query(action, parent.model_type, capacity_bucket(parent_mg))
+            mem_mean = pq.mean_delta
+            mem_var = pq.uncertainty
+            mem_obs = sum(pq.evidence_counts.values())
+            source_family = "unknown"
+
+        recent_trials = [t for t in self._improvement_history[-10:]]
+        failure_count = sum(1 for d in recent_trials if d < -0.01)
+        failure_rate = failure_count / max(1, len(recent_trials))
+        
+        # 12F.2: Canonical 9-part context
         return {
-            "source_task": "unknown",
-            "target_task": self.task.name,
-            "x": [1.0, 0.0, 0.0, 0.0, 0.0]  # Simple bias-only feature for now
+            "source_context": {
+                "family": source_family,
+            },
+            "target_context": {
+                "family": getattr(self.task, "family", "unknown"),
+                "current_metric": best_metric,
+            },
+            "relationship_context": {
+                "cross_family": int(source_family != getattr(self.task, "family", "unknown")) if source_family != "unknown" else 0,
+            },
+            "memory_state": {
+                "posterior_mean": mem_mean,
+                "posterior_variance": mem_var,
+                "observations": mem_obs,
+            },
+            "evidence_quality": {
+                "observation_count": mem_obs,
+            },
+            "uncertainty": {
+                "epistemic": mem_var,
+            },
+            "failure_state": {
+                "recent_failure_rate": failure_rate,
+            },
+            "research_trajectory": {
+                "generation": gen,
+                "budget_remaining": max(0, n_generations - gen),
+            },
+            "resource_context": {
+                "total_budget": n_generations,
+            }
         }
 
     def _select_strategy(self, parent: TargetModelGenome,
@@ -514,8 +562,9 @@ class ResearchController:
 
             # 3. Phase 12D: Compute Utility-Aware Gate modifier for all actions
             gate_modifiers = {}
+            gate_decisions = {}
             for a in STRATEGIES:
-                ctx12 = self._build_phase12_context(a, parent)
+                ctx12 = self._build_phase12_context(a, parent, best_metric=best_metric, gen=gen, n_generations=n_generations)
                 evidence = self._evidence_service.get_evidence(ctx12)
                 if evidence.status == "ESTIMATED" and evidence.expected_delta is not None:
                     mean, var = evidence.expected_delta, evidence.variance
@@ -527,6 +576,7 @@ class ResearchController:
                 # We use UtilityAwareGate rather than old TransferGate
                 gate_decision = self._utility_gate.compute(a, probs["P_B"], probs["P_N"], probs["P_H"], mean, var)
                 gate_modifiers[a] = gate_decision.modifier
+                gate_decisions[a] = gate_decision
 
             gate_fn = lambda a: gate_modifiers.get(a, 0.0)
 
@@ -538,7 +588,7 @@ class ResearchController:
             chosen = decision.chosen_action
             
             # 6. Phase 12C: Active Counterfactual Sampling trigger
-            ctx12_chosen = self._build_phase12_context(chosen, parent)
+            ctx12_chosen = self._build_phase12_context(chosen, parent, best_metric=best_metric, gen=gen, n_generations=n_generations)
             _, var_chosen, _ = self._utility_predictor.predict_utility(ctx12_chosen)
             sample_cf = self._sampling_policy.should_sample(var_chosen, gen, n_generations)
             
@@ -560,6 +610,7 @@ class ResearchController:
                     "posterior_uncertainty": posteriors[chosen].uncertainty,
                     "context": ctx.to_dict(),
                     "all_scores": {a: s.to_dict() for a, s in decision.action_scores.items()},
+                    "gate_decisions": {a: gd.to_dict() for a, gd in gate_decisions.items()},
                 },
             }
             return chosen, True, sample_cf
@@ -679,7 +730,6 @@ class ResearchController:
             # Identify memory context (if any) for the synthesis intervention
             memory_ctx = None
             if self.use_contextual_policy and self._posterior_memory:
-                from ..genome.capacity import capacity_bucket
                 pq = self._posterior_memory.query(strategy, parent.model_type, capacity_bucket(parent_mg))
                 memory_ctx = pq.to_dict() if hasattr(pq, 'to_dict') else str(pq)
                 
@@ -726,8 +776,10 @@ class ResearchController:
                             delta_t = exp_result.metric - fresh_result.metric
                             
                             # Update the Utility Predictor with the observed paired counterfactual
-                            ctx12 = self._build_phase12_context(strategy, parent)
+                            ctx12 = self._build_phase12_context(strategy, parent, best_metric=best_metric, gen=gen, n_generations=n_generations)
                             self._utility_predictor.update(ctx12, observed_delta=delta_t)
+                        else:
+                            pass
                     except Exception:
                         pass  # If fresh arm fails, we cannot record a clean paired observation
 

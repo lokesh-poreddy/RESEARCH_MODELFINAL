@@ -39,30 +39,53 @@ class TransferUtilityPredictor:
         self.prec_w = np.eye(feature_dim) * alpha
 
     def _extract_features(self, context_features: Dict[str, Any]) -> np.ndarray:
-        """Flattens the structured context dictionary into a fixed-length vector."""
-        # For Phase 12B, we assume the caller provides a pre-flattened 'vector' 
-        # or we construct one. A robust implementation would use a DictVectorizer.
-        # Here we expect the caller to provide 'x' directly for mathematical simplicity.
+        """Flattens the structured 9-part context dictionary into a fixed-length vector."""
+        if 'source_context' in context_features:
+            x = np.zeros(self.feature_dim)
+            x[0] = 1.0  # bias
+            
+            # C_t
+            tc = context_features.get('target_context', {})
+            x[1] = tc.get('current_metric', 0.0)
+            
+            # C_st
+            rc = context_features.get('relationship_context', {})
+            x[2] = float(rc.get('cross_family', 0))
+            
+            # M
+            ms = context_features.get('memory_state', {})
+            x[3] = ms.get('posterior_mean', 0.0)
+            x[4] = ms.get('posterior_variance', 1.0)
+            
+            # E
+            eq = context_features.get('evidence_quality', {})
+            x[5] = float(eq.get('observation_count', 0))
+            
+            # U
+            unc = context_features.get('uncertainty', {})
+            x[6] = unc.get('epistemic', 1.0)
+            
+            # F
+            fs = context_features.get('failure_state', {})
+            x[7] = fs.get('recent_failure_rate', 0.0)
+            
+            # R
+            rt = context_features.get('research_trajectory', {})
+            x[8] = float(rt.get('budget_remaining', 0))
+            
+            return x
+
         if 'x' in context_features:
             x = np.array(context_features['x'], dtype=float)
-        else:
-            # Fallback mock feature extraction for structural completeness
-            x = np.zeros(self.feature_dim)
-            x[0] = 1.0 # bias
-            
-            # Domain similarity heuristic feature
-            if context_features.get('source_task') == context_features.get('target_task'):
-                x[1] = 1.0
-                
-            # Metric gaps
-            src_metric = context_features.get('source_metric', 0.0)
-            tgt_metric = context_features.get('target_metric', 0.0)
-            x[2] = src_metric
-            x[3] = tgt_metric
-            x[4] = src_metric - tgt_metric
-            
-        if len(x) != self.feature_dim:
-            raise ValueError(f"Feature dimension mismatch: expected {self.feature_dim}, got {len(x)}")
+            # pad or truncate if needed
+            if len(x) < self.feature_dim:
+                x = np.pad(x, (0, self.feature_dim - len(x)))
+            return x[:self.feature_dim]
+        
+        # Fallback
+        x = np.zeros(self.feature_dim)
+        x[0] = 1.0 # bias
+        return x
         return x
 
     def predict_utility(self, context_features: Dict[str, Any]) -> Tuple[float, float, Dict[str, float]]:
