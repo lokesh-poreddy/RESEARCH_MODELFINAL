@@ -5,9 +5,6 @@ This file summarizes the benchmark execution results for the ResearchForge ECRM 
 
 ## End-to-End Execution Status
 - **Execution Class**: `END_TO_END_INTEGRATION_RUN`
-- **Provider**: `huggingface`
-- **Model**: `Qwen/Qwen3.8-27B:ovhcloud`
-- **Evidence Status**: `EXECUTED_PARTIAL_402` (Execution proved successful routing and authentication, hitting HF inference quota). 
 
 ## RDE-Bench Results
 
