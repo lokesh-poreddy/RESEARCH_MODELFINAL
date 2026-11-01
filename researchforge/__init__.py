@@ -21,4 +21,4 @@ and what is a deliberately lightweight, offline stand-in for infrastructure
 cannot provide.
 """
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"  # RF-1 + RF-2 (contextual transfer policy) + RF-3 (algorithm discovery)

@@ -115,3 +115,54 @@ class VRDEGProjector:
     def project_events(self, events: List[Event]) -> None:
         for ev in events:
             self.project_event(ev)
+
+    def project_gate_decision(
+        self,
+        decision_id: str,
+        gate_decision: str,
+        confidence: float,
+        prior_task_id: str,
+        target_task_id: str,
+        schema_version: str = "1.0.0",
+        provenance_id: str | None = None,
+        metadata: Dict[str, Any] | None = None,
+    ) -> None:
+        """Projects an RF-2 transfer gate decision (TRANSFER/SUPPRESS/ABSTAIN) into VRDEG provenance edge store."""
+        self._ensure_provenance_node(provenance_id, schema_version)
+        if not self.graph.get_node(decision_id):
+            dn = GraphNode(
+                id=decision_id,
+                schema_version=schema_version,
+                node_type=NodeType.DECISION.value,
+                payload_ref=decision_id,
+                provenance_id=provenance_id,
+            )
+            self.graph.add_node(dn)
+
+        if not self.graph.get_node(target_task_id):
+            tn = GraphNode(
+                id=target_task_id,
+                schema_version=schema_version,
+                node_type=NodeType.RESEARCH_PROBLEM.value,
+                payload_ref=target_task_id,
+                provenance_id=provenance_id,
+            )
+            self.graph.add_node(tn)
+
+        edge_id = f"edge:gate:{decision_id}->{target_task_id}"
+        if not self.graph.get_edge(edge_id):
+            edge = GraphEdge(
+                id=edge_id,
+                schema_version=schema_version,
+                source_id=decision_id,
+                target_id=target_task_id,
+                relation=RelationType.GATED_BY.value,
+                provenance_id=provenance_id,
+                confidence=confidence,
+                metadata={
+                    "gate_decision": gate_decision,
+                    "prior_task_id": prior_task_id,
+                    **(metadata or {}),
+                },
+            )
+            self.graph.add_edge(edge)

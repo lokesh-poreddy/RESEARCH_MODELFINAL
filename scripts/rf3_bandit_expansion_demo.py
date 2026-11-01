@@ -6,7 +6,7 @@ into a live ResearchController run, dynamically expanding the bandit's arms.
 import sys
 import os
 import random
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from researchforge.benchmarks.continuity.tasks import digits_all_task
 from researchforge.pipeline.controller import ResearchController

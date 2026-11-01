@@ -7,7 +7,40 @@ and must be preserved — they are not removed from this file.
 Format follows [Keep a Changelog](https://keepachangelog.com).
 
 ---
+## [1.0.0] — 2026-11-01 — RF-1 + RF-2 + RF-3 Integrated Release
+
+**Character of release:** Production-hardened integration unifying three generations:
+RF-1 (evolutionary controller), RF-2 (contextual transfer policy), and RF-3 (autonomous algorithm discovery).
+
+### Added — RF-3: Algorithm Discovery Pipeline (Phase 13)
+- **`researchforge/discovery/operator_genome.py`**: `OperatorGenome` evolutionary mutation; 3 seed operators.
+- **`researchforge/discovery/dsl_compiler.py`**: 8 AST-to-genome primitive handlers with safety bounds.
+- **`researchforge/discovery/meta_controller.py`**: Real two-arm pilot evaluation; auto-promotes to live bandit.
+- **`researchforge/genome/operators.py`**: `DYNAMIC_STRATEGIES` registry + `register_dynamic_strategy()`.
+- **`researchforge/policy/contextual_bandit.py`**: `add_action()` for dynamic arm injection.
+
+### Added — RF-2: Contextual Transfer Policy (Phase 12)
+- **`researchforge/transfer/utility_learner.py`**: Online Bayesian linear regression, 9 normalised features.
+- **`researchforge/transfer/sampling.py`**: Counterfactual sampling, epsilon 20%→1% decay.
+- **`researchforge/policy/utility_gate.py`**: Bayesian TRANSFER/SUPPRESS/ABSTAIN gating.
+
+### Fixed — Bugs Resolved in Audit 2026-11-01
+- `utility_learner.py`: Removed duplicate `return x`; log1p-normalised `observation_count`; beta 1→10.
+- `sampling.py`: Division-by-zero guard; epsilon range fixed; trigger telemetry added.
+- `operator_genome.py`: Primitive vocab synced with DSLCompiler.
+- `meta_controller.py`: Real two-arm pilot replaces mock evaluator.
+- `benchmark_b1_regression.py`: AUC now uses running-best curve. PASS/FAIL criterion added.
+- `benchmark_b10_ablation.py`: Cohen's d effect sizes added.
+
+### Validated Benchmark Results
+- B1 Regression: RF-2 0.8779 ≥ 98% of RF-1 0.8825 → **PASS**
+- B3 Transfer Matrix: T6 +0.352, T5 +0.042 (out-of-distribution benefit confirmed)
+- B10 Ablation: Cohen's d vs Full RF-2 computed for all 4 conditions
+- Import health: 11/11 canonical modules clean
+
+---
 ## [RF-1.0.0-alpha.2.1] — 2026-09-03 — Architecture Convergence & Contract Hardening
+
 
 **Character of release**: Architectural. Reconciles dual-stack architecture into
 ONE canonical domain model (14 objects), ONE canonical execution path (TMG population),

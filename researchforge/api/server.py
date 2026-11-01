@@ -424,9 +424,31 @@ def create_insight(req: InsightRequest) -> Dict[str, Any]:
     return node.to_dict()
 
 
-@app.get("/safety/status")
-def safety_status() -> Dict[str, Any]:
-    return _safe_runner.status_report()
+@app.post("/api/discovery/meta-generation")
+def run_meta_generation(
+    population_size: int = Query(default=3, ge=1, le=10),
+    n_pilot_gens: int = Query(default=3, ge=1, le=10),
+) -> Dict[str, Any]:
+    """Runs one meta-generation cycle of algorithm discovery (RF-3)."""
+    from ..discovery.meta_controller import MetaController
+    meta_ctrl = MetaController(population_size=population_size, n_pilot_gens=n_pilot_gens)
+    newly_promoted = meta_ctrl.step()
+    return {
+        "status": "success",
+        "population": meta_ctrl.get_population_summary(),
+        "promoted_count": len(newly_promoted),
+        "promoted_operators": [op.name for op in newly_promoted],
+    }
+
+
+@app.get("/api/discovery/operators")
+def list_discovered_operators() -> Dict[str, Any]:
+    """Lists all dynamically discovered and registered mutation strategies."""
+    from ..genome.operators import DYNAMIC_STRATEGIES
+    return {
+        "dynamic_strategies": list(DYNAMIC_STRATEGIES.keys()),
+        "count": len(DYNAMIC_STRATEGIES),
+    }
 
 
 @app.get("/health")
