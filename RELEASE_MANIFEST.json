@@ -1,0 +1,80 @@
+{
+  "project": "ResearchForge-ECRM",
+  "version": "1.0.0",
+  "phase": "RF-3",
+  "release_name": "RF-1 + RF-2 + RF-3 Integrated Release \u2014 Contextual Policy and Algorithm Discovery",
+  "parent_release": "0.6.0",
+  "parent_phase": "1.5",
+  "parent_checkpoint_policy": "Preserve the 0.5.0 Phase 1.4 release unchanged; this increment is additive.",
+  "source_tree": "ResearchForge_ECRM_Phase1_5_Integrated",
+  "canonical_repository": "https://github.com/lokesh-poreddy/RESEARCH_MODELFINAL",
+  "canonical_branch": "rf-3-algorithm-discovery",
+  "parent_commit": "28fd0f7820b7600f82e4f009cf47f0ee19604b03",
+  "alembic_parent": "005_advanced_research_knowledge_graph",
+  "alembic_head": "006_evidence_quality_reproducibility",
+  "domain_profiles": 13,
+  "phase15_additive_tables": 6,
+  "canonical_orm_tables": 57,
+  "phase15_schemas": 5,
+  "total_json_schemas": 27,
+  "artifacts": {
+    "source_archive": "ResearchForge_ECRM_Phase1_5_Integrated_Source_2026-11-01.zip",
+    "additive_patch": "ResearchForge_ECRM_Phase1_5_Additive_Patch_2026-11-01.zip",
+    "wheel": "researchforge_ecrm-0.6.0-py3-none-any.whl",
+    "wheel_sha256": "f7aaca0d624802842f70339428a166583564e8a5fdb913fe2deb32764bf12654",
+    "source_archive_file_count": 700,
+    "additive_patch_counts": {
+      "added": 18,
+      "modified": 17,
+      "deleted": 0
+    }
+  },
+  "validation": {
+    "platform_tests": "85 passed",
+    "phase15_focused_tests": "5 passed",
+    "selected_inherited_regressions": "40 passed",
+    "json_schemas": "27/27 valid",
+    "canonical_persistence": "57/57 ORM tables registered and present in in-memory SQLite",
+    "offline_quality_reproducibility_smoke": "passed; 3 appraisals, 1 reproducibility profile, 1 calibration, 5 provenance records, 1 review, 1 hypothesis quality-lineage item",
+    "migration": "fresh SQLite upgrade 001\u2192006, downgrade 006\u2192005, re-upgrade 005\u2192006 passed",
+    "python_compileall": "passed",
+    "wheel": "0.6.0 built and imported in an isolated target directory; 13 domain profiles available",
+    "full_repository_suite": "not certified",
+    "live_postgresql": "not tested",
+    "production_concurrency_and_load": "not tested",
+    "ruff_and_formal_static_security_audit": "not completed",
+    "domain_expert_criterion_validity": "not established",
+    "clean_patch_application": "passed on clean Phase 1.4 0.5.0 archive; patched tree repeated 85 platform tests, 40 inherited regressions, 27 schemas, 57-table persistence validator and Phase 1.5 smoke validator",
+    "rf3_module_imports": "11/11 passed",
+    "B1_regression": "PASS",
+    "B10_ablation": "PASS"
+  },
+  "known_boundaries": [
+    "Appraisal scores are coverage-aware, assessor-entered indicators, not probabilities, GRADE certainty ratings or validated risk-of-bias scores.",
+    "Unknown methodological dimensions remain not_reported; not_applicable dimensions are explicit and excluded from coverage.",
+    "Reproducibility profiles record reported artifact availability and replication status; submitted code/artifacts are not executed and reproduction is not independently certified.",
+    "Calibration requires binary outcomes, minimum sample counts, unique opaque disjoint train/holdout IDs, and non-degraded holdout Brier/ECE. These checks do not prove external cohort independence, label correctness, representativeness or future validity.",
+    "A calibration non-degradation gate is not a statistical significance test.",
+    "Quality-gated hypotheses remain drafts; provenance and review do not establish causal or scientific validity.",
+    "Live PostgreSQL, production concurrency/load, full monolithic suite and formal security/static audits remain outstanding."
+  ],
+  "release_date": "2026-11-01",
+  "rf2_components": {
+    "utility_learner": "researchforge/transfer/utility_learner.py",
+    "sampling": "researchforge/transfer/sampling.py",
+    "utility_gate": "researchforge/policy/utility_gate.py",
+    "contextual_bandit": "researchforge/policy/contextual_bandit.py"
+  },
+  "rf3_components": {
+    "operator_genome": "researchforge/discovery/operator_genome.py",
+    "dsl_compiler": "researchforge/discovery/dsl_compiler.py",
+    "meta_controller": "researchforge/discovery/meta_controller.py",
+    "dynamic_strategies": "researchforge/genome/operators.py"
+  },
+  "benchmark_results": {
+    "B1_regression": "PASS \u2014 RF-2 0.8779 >= 98pct of RF-1 0.8825",
+    "B3_transfer_matrix": "PASS \u2014 T6 +0.352, T5 +0.042",
+    "B10_ablation": "PASS \u2014 Cohen d computed for all 4 conditions"
+  },
+  "module_import_health": "11/11 canonical modules import cleanly"
+}

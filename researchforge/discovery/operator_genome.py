@@ -15,7 +15,7 @@ import copy
 import random
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 # ---------------------------------------------------------------------------
 # Canonical list of all primitives the DSLCompiler knows how to handle.
@@ -26,6 +26,7 @@ KNOWN_PRIMITIVES: List[str] = [
     "ExpandWidth",
     "IdentifyDeepestPath",
     "InsertResidual",
+    "AddSkipConnection",
     "PruneLowestMagnitude",
     "ReduceWidth",
     "AddLayer",
@@ -70,6 +71,7 @@ class OperatorGenome:
     id: str = field(default_factory=lambda: str(uuid.uuid4())[:8])
     utility_score: float = 0.0   # Empirically estimated average Delta from pilot runs
     n_evaluations: int = 0       # Number of times this operator has been scored
+    score: Optional[float] = None
 
     def mutate(self, rng: random.Random) -> OperatorGenome:
         """Structural + parametric mutation, returning a new OperatorGenome child."""

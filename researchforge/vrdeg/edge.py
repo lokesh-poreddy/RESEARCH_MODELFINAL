@@ -33,6 +33,8 @@ class RelationType(str, Enum):
     USES_GENOME = "USES_GENOME"
     USES_DATASET = "USES_DATASET"
     HAS_PROVENANCE = "HAS_PROVENANCE"
+    GATED_BY = "GATED_BY"
+    TRANSFER_DECISION = "TRANSFER_DECISION"
 
 
 @dataclass(frozen=True)
