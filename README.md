@@ -77,6 +77,7 @@ python3 scripts/rf3_bandit_expansion_demo.py
 python3 scripts/benchmark_b1_regression.py     # B1: Regression benchmark
 python3 scripts/benchmark_b3_transfer_matrix.py # B3: Multi-task transfer matrix
 python3 scripts/benchmark_b10_ablation.py      # B10: Ablation study with Cohen's d
+python3 scripts/run_chemreact_experiment.py    # ChemReact: Reaction-kinetics defect & titration benchmark
 ```
 
 ### Launching the REST API
@@ -141,6 +142,26 @@ Executed via `scripts/rf3_bandit_expansion_demo.py`:
 - **Dynamic Compilation & Registration:** Compiled into an executable callable via `DSLCompiler` and registered into the global `DYNAMIC_STRATEGIES` catalog.
 - **Bandit Arm Expansion:** Injected `Evolved_increase_capacity_dsl_643` into the active contextual bandit, expanding the action space from K = 7 to K = 8 actions without restarting the experiment.
 - **Autonomous Search Convergence:** Search resumed for 5 generations with the expanded operator set, achieving a final validation metric of 0.8629.
+
+### F. ChemReact: Reaction-Kinetics Defect Detection & Titration Benchmark
+Full paradigm specification and report in `docs/CHEMREACT_RESEARCH_REPORT.md` and results in `chemreact_evaluation_results.json`:
+- **Mathematical Paradigm:** Models defect formation via Arrhenius reaction kinetics:
+  $$k_f = A \exp\left(-\frac{E_a}{R T_{\text{eff}}}\right), \quad r_f = k_f [C]^\alpha [D]^\beta [K]^\gamma$$
+  and automated test-case generation as chemical affinity neutralization titration reaching equivalence:
+  $$\kappa_{ij} = \exp\left(-\frac{\Delta G^\ddagger(t_i, d_j)}{k_B T_{\text{eff}}}\right)$$
+- **Defect Detection Evaluation (N=600, 12 kinetic features, target=0.88):**
+  - Validation Accuracy: **96.81%** (contextual_policy: **96.67%** +/- 0.0000)
+  - Held-out Test Accuracy: **94.31% - 96.25%**
+  - Held-out Test ROC-AUC: **0.9903 - 0.9930**
+  - Held-out Test F1 Score: **0.9420 - 0.9615**
+  - Failure Repetition Rate (FRR): **0.0000** (vs 0.0208 for random search)
+- **Multi-Task Test-Case Titration Equivalence (N=500, 14 features, target=0.85):**
+  - Test Accuracy: **92.50%**
+  - Test ROC-AUC: **0.9817**
+  - Test F1 Score: **0.9351**
+- **Autonomous RF-3 Operator Discovery on ChemReact:**
+  - Evolved and compiled `CatalyticArrheniusExpansion` (`ExpandWidth`, `InsertResidual`, `AddLayer`).
+  - Dynamically injected into the live contextual bandit during execution with zero runtime interruptions.
 
 ---
 

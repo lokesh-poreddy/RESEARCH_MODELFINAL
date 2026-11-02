@@ -1,0 +1,1535 @@
+{
+  "timestamp": "2026-11-02T07:30:14Z",
+  "paradigm": "ChemReact: Reaction-Kinetics-Based Mathematical Defect Detection & Titration",
+  "defect_detection_benchmark": {
+    "contextual_policy": {
+      "mean_best_metric": 0.9667,
+      "std_best_metric": 0.0,
+      "research_efficiency": 0.0644,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.0,
+      "elapsed_seconds": 10.09,
+      "convergence_curve": [
+        0.9583,
+        0.9597,
+        0.9611,
+        0.9611,
+        0.9653,
+        0.9653,
+        0.9667,
+        0.9667,
+        0.9667,
+        0.9667,
+        0.9667,
+        0.9667,
+        0.9667,
+        0.9667,
+        0.9667
+      ],
+      "arm_pull_distribution": {
+        "baseline": 3,
+        "increase_capacity": 45
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 48
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9625,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9625,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9625,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9625,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 12,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 13,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9667,
+          "best_so_far": 0.9667,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": -0.0016
+    },
+    "full": {
+      "mean_best_metric": 0.9681,
+      "std_best_metric": 0.0039,
+      "research_efficiency": 0.0645,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.1333,
+      "elapsed_seconds": 0.56,
+      "convergence_curve": [
+        0.9583,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9681,
+        0.9681,
+        0.9681
+      ],
+      "arm_pull_distribution": {
+        "baseline": 3,
+        "increase_capacity": 7,
+        "add_regularization": 6,
+        "tune_learning_dynamics": 6,
+        "change_family": 6,
+        "feature_preprocessing": 7,
+        "crossover_top2": 7,
+        "random_perturbation": 6
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 42,
+        "SVC": 2,
+        "MLPClassifier": 1,
+        "RandomForestClassifier": 3
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "change_family",
+          "model_type": "SVC",
+          "metric": 0.9042,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9708,
+          "best_so_far": 0.9708,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 12,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9708,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 13,
+          "strategy": "change_family",
+          "model_type": "MLPClassifier",
+          "metric": 0.9542,
+          "best_so_far": 0.9708,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": 0.0
+    },
+    "no_memory": {
+      "mean_best_metric": 0.9681,
+      "std_best_metric": 0.0039,
+      "research_efficiency": 0.0645,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.0,
+      "elapsed_seconds": 0.38,
+      "convergence_curve": [
+        0.9583,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9597,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9681,
+        0.9681,
+        0.9681
+      ],
+      "arm_pull_distribution": {
+        "baseline": 3,
+        "increase_capacity": 7,
+        "add_regularization": 6,
+        "tune_learning_dynamics": 6,
+        "change_family": 6,
+        "feature_preprocessing": 7,
+        "crossover_top2": 7,
+        "random_perturbation": 6
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 42,
+        "SVC": 2,
+        "MLPClassifier": 1,
+        "RandomForestClassifier": 3
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "change_family",
+          "model_type": "SVC",
+          "metric": 0.9042,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9708,
+          "best_so_far": 0.9708,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 12,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9708,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 13,
+          "strategy": "change_family",
+          "model_type": "MLPClassifier",
+          "metric": 0.9542,
+          "best_so_far": 0.9708,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": 0.0
+    },
+    "random": {
+      "mean_best_metric": 0.9653,
+      "std_best_metric": 0.0071,
+      "research_efficiency": 0.0644,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0208,
+      "negative_transfer_rate": 0.0,
+      "elapsed_seconds": 0.41,
+      "convergence_curve": [
+        0.9583,
+        0.9583,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9639,
+        0.9653,
+        0.9653,
+        0.9653,
+        0.9653,
+        0.9653,
+        0.9653
+      ],
+      "arm_pull_distribution": {
+        "baseline": 3,
+        "increase_capacity": 5,
+        "add_regularization": 9,
+        "crossover_top2": 5,
+        "random_perturbation": 8,
+        "tune_learning_dynamics": 7,
+        "change_family": 7,
+        "feature_preprocessing": 4
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 41,
+        "SVC": 2,
+        "MLPClassifier": 3,
+        "RandomForestClassifier": 2
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.9542,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9583,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9625,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9625,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "change_family",
+          "model_type": "SVC",
+          "metric": 0.9042,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 12,
+          "strategy": "change_family",
+          "model_type": "MLPClassifier",
+          "metric": 0.9542,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 13,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9583,
+          "best_so_far": 0.9625,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": -0.0016
+    }
+  },
+  "rf3_algorithm_discovery": {
+    "top_operator_name": "CatalyticArrheniusExpansion",
+    "top_operator_primitives": [
+      {
+        "name": "ExpandWidth",
+        "params": {
+          "factor": 1.4
+        }
+      },
+      {
+        "name": "InsertResidual",
+        "params": {
+          "stride_match": true
+        }
+      },
+      {
+        "name": "AddLayer",
+        "params": {
+          "units": 32,
+          "position": "middle"
+        }
+      }
+    ],
+    "utility_score": 0.015,
+    "pre_injection_best": 0.9625,
+    "post_injection_best": 0.9667,
+    "discovered_arm_pulls": 0,
+    "final_action_space_size": 12,
+    "population_summary": [
+      {
+        "id": "780e6012",
+        "name": "increase_capacity_dsl",
+        "primitives": [
+          {
+            "name": "FindBottleneck",
+            "params": {
+              "metric": "activation_variance"
+            }
+          },
+          {
+            "name": "ExpandWidth",
+            "params": {
+              "factor": 1.5
+            }
+          }
+        ],
+        "utility_score": 0.0,
+        "n_evaluations": 1
+      },
+      {
+        "id": "73424b55",
+        "name": "add_skip_connection_dsl",
+        "primitives": [
+          {
+            "name": "IdentifyDeepestPath",
+            "params": {}
+          },
+          {
+            "name": "InsertResidual",
+            "params": {
+              "stride_match": true
+            }
+          }
+        ],
+        "utility_score": 0.0,
+        "n_evaluations": 1
+      },
+      {
+        "id": "5f674c06",
+        "name": "prune_and_grow_dsl",
+        "primitives": [
+          {
+            "name": "PruneLowestMagnitude",
+            "params": {}
+          },
+          {
+            "name": "AddLayer",
+            "params": {
+              "units": 64
+            }
+          }
+        ],
+        "utility_score": 0.0,
+        "n_evaluations": 1
+      },
+      {
+        "id": "7cc02314",
+        "name": "Evolved_add_skip_connection_dsl_792",
+        "primitives": [
+          {
+            "name": "IdentifyDeepestPath",
+            "params": {}
+          },
+          {
+            "name": "InsertResidual",
+            "params": {
+              "stride_match": true
+            }
+          }
+        ],
+        "utility_score": 0.0,
+        "n_evaluations": 1
+      }
+    ]
+  },
+  "testcase_titration_benchmark": {
+    "contextual_policy": {
+      "mean_best_metric": 0.9,
+      "std_best_metric": 0.0,
+      "research_efficiency": 0.075,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.0,
+      "elapsed_seconds": 0.13,
+      "convergence_curve": [
+        0.89,
+        0.8925,
+        0.8925,
+        0.8975,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9
+      ],
+      "arm_pull_distribution": {
+        "baseline": 2,
+        "increase_capacity": 24
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 26
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.895,
+          "best_so_far": 0.895,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.895,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.895,
+          "best_so_far": 0.895,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": -0.0027
+    },
+    "full": {
+      "mean_best_metric": 0.9025,
+      "std_best_metric": 0.0025,
+      "research_efficiency": 0.0752,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.0833,
+      "elapsed_seconds": 0.3,
+      "convergence_curve": [
+        0.89,
+        0.8925,
+        0.8925,
+        0.8925,
+        0.8925,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025
+      ],
+      "arm_pull_distribution": {
+        "baseline": 2,
+        "increase_capacity": 2,
+        "add_regularization": 2,
+        "tune_learning_dynamics": 2,
+        "change_family": 2,
+        "feature_preprocessing": 2,
+        "crossover_top2": 2,
+        "random_perturbation": 2,
+        "increase_capacity_dsl": 2,
+        "add_skip_connection_dsl": 2,
+        "prune_and_grow_dsl": 2,
+        "Evolved_add_skip_connection_dsl_792": 2,
+        "CatalyticArrheniusExpansion": 2
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 24,
+        "SVC": 1,
+        "RandomForestClassifier": 1
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "change_family",
+          "model_type": "SVC",
+          "metric": 0.825,
+          "best_so_far": 0.89,
+          "failure": "Overfitting"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "increase_capacity_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "add_skip_connection_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "prune_and_grow_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "Evolved_add_skip_connection_dsl_792",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "CatalyticArrheniusExpansion",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.895,
+          "best_so_far": 0.895,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": 0.0
+    },
+    "no_memory": {
+      "mean_best_metric": 0.9025,
+      "std_best_metric": 0.0025,
+      "research_efficiency": 0.0752,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.0,
+      "elapsed_seconds": 0.17,
+      "convergence_curve": [
+        0.89,
+        0.8925,
+        0.8925,
+        0.8925,
+        0.8925,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025,
+        0.9025
+      ],
+      "arm_pull_distribution": {
+        "baseline": 2,
+        "increase_capacity": 2,
+        "add_regularization": 2,
+        "tune_learning_dynamics": 2,
+        "change_family": 2,
+        "feature_preprocessing": 2,
+        "crossover_top2": 2,
+        "random_perturbation": 2,
+        "increase_capacity_dsl": 2,
+        "add_skip_connection_dsl": 2,
+        "prune_and_grow_dsl": 2,
+        "Evolved_add_skip_connection_dsl_792": 2,
+        "CatalyticArrheniusExpansion": 2
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 24,
+        "SVC": 1,
+        "RandomForestClassifier": 1
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "add_regularization",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "change_family",
+          "model_type": "SVC",
+          "metric": 0.825,
+          "best_so_far": 0.89,
+          "failure": "Overfitting"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "crossover_top2",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "increase_capacity_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "add_skip_connection_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "prune_and_grow_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "Evolved_add_skip_connection_dsl_792",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "CatalyticArrheniusExpansion",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.895,
+          "best_so_far": 0.895,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": 0.0
+    },
+    "random": {
+      "mean_best_metric": 0.9,
+      "std_best_metric": 0.0,
+      "research_efficiency": 0.075,
+      "search_efficiency": -1,
+      "failure_repetition_rate": 0.0,
+      "negative_transfer_rate": 0.0,
+      "elapsed_seconds": 0.54,
+      "convergence_curve": [
+        0.89,
+        0.895,
+        0.895,
+        0.895,
+        0.895,
+        0.895,
+        0.895,
+        0.9,
+        0.9,
+        0.9,
+        0.9,
+        0.9
+      ],
+      "arm_pull_distribution": {
+        "baseline": 2,
+        "increase_capacity": 2,
+        "change_family": 4,
+        "add_regularization": 1,
+        "prune_and_grow_dsl": 3,
+        "add_skip_connection_dsl": 3,
+        "CatalyticArrheniusExpansion": 2,
+        "random_perturbation": 2,
+        "tune_learning_dynamics": 1,
+        "feature_preprocessing": 3,
+        "increase_capacity_dsl": 2,
+        "Evolved_add_skip_connection_dsl_792": 1
+      },
+      "model_family_distribution": {
+        "LogisticRegression": 18,
+        "MLPClassifier": 6,
+        "RandomForestClassifier": 1,
+        "SVC": 1
+      },
+      "sample_trials": [
+        {
+          "seed": 42,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 0,
+          "strategy": "increase_capacity",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 1,
+          "strategy": "change_family",
+          "model_type": "MLPClassifier",
+          "metric": 0.88,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 2,
+          "strategy": "add_regularization",
+          "model_type": "MLPClassifier",
+          "metric": 0.88,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 3,
+          "strategy": "prune_and_grow_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 4,
+          "strategy": "increase_capacity",
+          "model_type": "MLPClassifier",
+          "metric": 0.88,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 5,
+          "strategy": "prune_and_grow_dsl",
+          "model_type": "MLPClassifier",
+          "metric": 0.88,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 6,
+          "strategy": "add_skip_connection_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 7,
+          "strategy": "CatalyticArrheniusExpansion",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 8,
+          "strategy": "CatalyticArrheniusExpansion",
+          "model_type": "MLPClassifier",
+          "metric": 0.88,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 9,
+          "strategy": "random_perturbation",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 10,
+          "strategy": "tune_learning_dynamics",
+          "model_type": "LogisticRegression",
+          "metric": 0.9,
+          "best_so_far": 0.9,
+          "failure": "None"
+        },
+        {
+          "seed": 42,
+          "generation": 11,
+          "strategy": "feature_preprocessing",
+          "model_type": "LogisticRegression",
+          "metric": 0.78,
+          "best_so_far": 0.9,
+          "failure": "LowPerformance"
+        },
+        {
+          "seed": 101,
+          "generation": -1,
+          "strategy": "baseline",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        },
+        {
+          "seed": 101,
+          "generation": 0,
+          "strategy": "add_skip_connection_dsl",
+          "model_type": "LogisticRegression",
+          "metric": 0.89,
+          "best_so_far": 0.89,
+          "failure": "None"
+        }
+      ],
+      "memory_utility": -0.0027
+    }
+  }
+}
